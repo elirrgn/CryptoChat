@@ -1,0 +1,3 @@
+2025-04-01 18:02:16.449 [main] INFO  chat.Server.LogsManager - Server: Listening for clients
+2025-04-01 18:02:20.925 [main] INFO  chat.Server.LogsManager - Server: Client connected
+2025-04-01 18:02:30.412 [main] INFO  chat.Server.LogsManager - Server: Client authenticated as elirrgn

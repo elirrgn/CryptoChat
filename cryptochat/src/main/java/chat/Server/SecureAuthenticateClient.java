@@ -14,32 +14,26 @@ public class SecureAuthenticateClient {
     private static BigInteger sharedKey;
     private static SecretKey aesKey;
 
-    public static boolean SecureAuthentication(ObjectOutputStream out, ObjectInputStream in) {
+    public static String SecureAuthentication(ObjectOutputStream out, ObjectInputStream in) {
         try {
-            System.out.println("entrato secureauth");
             keyExchange(out, in);
-            System.out.println("sharedkey");
             deriveAESKey();
-            System.out.println("derivedkey");
             return authentication(out, in);
         } catch(Exception e) {
             System.out.println(e.getLocalizedMessage());
-            return false;
+            return null;
         }
     }
 
     private static void keyExchange(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         sharedKey = DHKeyExchange.serverSideSharedKeyCreation(out, in);
-        System.out.println("Fine key exchange");
     }
 
     private static void deriveAESKey() throws NoSuchAlgorithmException {
         aesKey = AES.deriveAESKey(sharedKey.toByteArray());
-        System.out.println("Shared Secret Derived. Ready to communicate securely.");
     }
 
-    private static boolean authentication(ObjectOutputStream out, ObjectInputStream in) throws Exception {
-        // Simulated Auth
+    private static String authentication(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         String message = "Send username please!";
         String encryptedResponse = AES.encrypt(message, aesKey);
         out.writeObject(encryptedResponse);
@@ -58,10 +52,10 @@ public class SecureAuthenticateClient {
 
         if(decryptedUsername.equals("elirrgn") && decryptedPsw.equals("Argelir")) {
             out.writeObject(AES.encrypt("/authenticatedCorrectly", aesKey));
-            return true;
+            return decryptedUsername;
         } else {
             out.writeObject(AES.encrypt("/authenticationError", aesKey));
-            return false;
+            return null;
         }
     }
     

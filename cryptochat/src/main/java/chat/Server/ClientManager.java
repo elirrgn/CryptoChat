@@ -8,12 +8,10 @@ import java.net.Socket;
 import chat.Shared.PacketManager;
 
 public class ClientManager implements Runnable {
-    private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
     public ClientManager(Socket socket) throws IOException {
-        this.socket = socket;
         this.in = new ObjectInputStream(socket.getInputStream());
         this.out = new ObjectOutputStream(socket.getOutputStream());
 
