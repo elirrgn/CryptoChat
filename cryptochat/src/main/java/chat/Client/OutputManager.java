@@ -6,14 +6,12 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class OutputManager implements Runnable {
-    private Socket socket;
     private ObjectOutputStream out;
     private Scanner input;
 
-
-    public OutputManager(Socket socket) throws IOException {
-        this.socket = socket;
-        this.out = new ObjectOutputStream(socket.getOutputStream());
+    public OutputManager(ObjectOutputStream out) throws IOException {
+        this.out = out;
+        this.input = new Scanner(System.in);
 
         new Thread(this).start();
     }
@@ -21,9 +19,19 @@ public class OutputManager implements Runnable {
     @Override
     public void run() {
         while(true) {
-            input.nextLine();
-            
+            String msg = input.nextLine();
+            sendMsg(msg);
+            if (!msg.startsWith("/")) {
+                
+            }
         }
     }
     
+    public void sendMsg(String msg) {
+        try {
+            out.writeObject(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

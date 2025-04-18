@@ -4,24 +4,38 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.core.config.Configurator;
+
+import chat.Shared.ManageJson;
+
+
 public class Server {
+    private static final Logger logger = LogManager.getLogger(Server.class);
+
 	private static final int PORT=1234;
 
     public static void main(String[] args) {
-        LogsManager.setUp();
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
         
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            LogsManager.INFO("Waiting for clients on port: "+PORT);
+            logger.info("Waiting for clients on port: "+PORT);
 
             while (true) {
-                try (Socket clientSocket = serverSocket.accept()) 
-                {
-                    LogsManager.INFO("Client connected");
-                    //ClientList.add(clientSocket);
-                    String nome = SecureAuthenticateClient.SecureAuthentication(new ObjectOutputStream(clientSocket.getOutputStream()), new ObjectInputStream(clientSocket.getInputStream()));
-                    LogsManager.INFO("Client authenticated as "+nome);
+                try {
+                    Socket clientSocket = serverSocket.accept();
+                    logger.info("Client connected");
+                    ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+                    ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+                    String nome = SecureAuthenticateClient.SecureAuthentication(out, in);
                     if(nome != null) {
-                        ClientList.add(clientSocket, nome);
+                        logger.info("Client authenticated as "+nome);
+                        out.writeObject("/sendPublic");
+                        String publicKey = (String) in.readObject();
+                        ManageJson.aggiungiChiavePubblica(nome, publicKey);
+                        ClientList.add(clientSocket, out, in, nome);
+                    } else {
+                        logger.info("Client not authenticated");
                     }
                 } catch (Exception e) {
                     System.err.println("Error handling connection: " + e.getMessage());

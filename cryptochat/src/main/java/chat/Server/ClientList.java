@@ -1,6 +1,8 @@
 package chat.Server;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 
@@ -8,10 +10,10 @@ public class ClientList {
     private static HashMap<String, Socket> list = new HashMap<String, Socket>();
     private static HashMap<String, ClientManager> managers = new HashMap<String,ClientManager>();
     
-    public static void add(Socket client, String nome) {
+    public static void add(Socket client, ObjectOutputStream out, ObjectInputStream in, String nome) {
         list.put(nome, client);
         try {
-            managers.put(nome, new ClientManager(client));
+            managers.put(nome, new ClientManager(client, out, in));
         } catch (IOException e) {
             e.printStackTrace();
         }

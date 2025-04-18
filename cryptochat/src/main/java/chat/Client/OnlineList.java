@@ -1,11 +1,12 @@
 package chat.Client;
 
+import java.security.PublicKey;
 import java.util.HashMap;
 
 public class OnlineList {
-    private static HashMap<String, String> clientKeys = new HashMap<String, String>(); // ClientName, Client public Key
+    private static HashMap<String, PublicKey> clientKeys = new HashMap<String, PublicKey>(); // ClientName, Client public Key
     
-    public static void addOnlineClient(String clientName, String publicKey) {
+    public static void addClient(String clientName, PublicKey publicKey) {
         clientKeys.put(clientName, publicKey);
     }
 
@@ -13,11 +14,11 @@ public class OnlineList {
         clientKeys.remove(clientName);
     }
 
-    public static void modifyPublicKey(String clientName, String publicKey) {
+    public static void modifyPublicKey(String clientName, PublicKey publicKey) {
         clientKeys.put(clientName, publicKey);   
     }
 
-    public static String getClientKey(String clientName){
+    public static PublicKey getClientKey(String clientName){
         return clientKeys.get(clientName);
     }
 }

@@ -11,9 +11,9 @@ public class ClientManager implements Runnable {
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public ClientManager(Socket socket) throws IOException {
-        this.in = new ObjectInputStream(socket.getInputStream());
-        this.out = new ObjectOutputStream(socket.getOutputStream());
+    public ClientManager(Socket socket, ObjectOutputStream out, ObjectInputStream in) throws IOException {
+        this.in = in;
+        this.out = out;
 
         new Thread(this).start();
     }
@@ -27,7 +27,7 @@ public class ClientManager implements Runnable {
         while(true) {
             try {
                 String msg = (String) in.readObject();
-                
+                System.out.println(msg);
                 if(PacketManager.checkPacketFormat(msg)) {
                     String dest = PacketManager.getPacketDest(msg);
                     if(dest != "all") {

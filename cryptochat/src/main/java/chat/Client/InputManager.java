@@ -2,18 +2,15 @@ package chat.Client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.Socket;
 
 import chat.Shared.PacketManager;
 
 public class InputManager implements Runnable {
-    private Socket socket;
     private ObjectInputStream in;
 
 
-    public InputManager(Socket socket) throws IOException {
-        this.socket = socket;
-        this.in = new ObjectInputStream(socket.getInputStream());
+    public InputManager(ObjectInputStream in) throws IOException {
+        this.in = in;
 
         new Thread(this).start();
     }
@@ -24,10 +21,8 @@ public class InputManager implements Runnable {
             try {
                 String msg = in.readObject().toString();
                 if(msg.startsWith("/")) {
-                    // Manage Server Messages
-                }
-
-                if(PacketManager.checkPacketFormat(msg)) {
+                    ServerCommandManager.manageCommand(msg);
+                } else if(PacketManager.checkPacketFormat(msg)) {
                     // Manage Chat Messages
                 }
             } catch (ClassNotFoundException | IOException e) {

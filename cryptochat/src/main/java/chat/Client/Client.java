@@ -17,13 +17,17 @@ public class Client {
 	private static final int PORT=1234;
     private static Socket socket;
 
+    
     public static void main(String[] args) {
 		try {
             socket = new Socket(ADDRESS, PORT);
             System.out.println("Connected to server!");
 
-            if(authenticationWithServer(socket)) {
-                System.out.println("Client Authenticated");
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+            if(authenticationWithServer(out, in)) {
+                new IOManager(socket, out, in);
             } else {
                 return;
             }
@@ -34,12 +38,10 @@ public class Client {
 		}
     }
 
-    private static boolean authenticationWithServer(Socket socket) {
-        try (
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+    private static boolean authenticationWithServer(ObjectOutputStream out, ObjectInputStream in) {
+        try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        ) {
+            
             BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
             
             SecretKey aesKey = AES.deriveAESKey(sharedKey.toByteArray());
@@ -49,9 +51,9 @@ public class Client {
                 String decryptedResponse = AES.decrypt(encryptedResponse, aesKey);
                 System.out.println("Server: " + decryptedResponse);
 
-                if(decryptedResponse.equalsIgnoreCase("/authenticatedCorrectly")){
+                if(decryptedResponse.equalsIgnoreCase("/authenticationCorrect")){
                     return true;
-                } else if(decryptedResponse.equalsIgnoreCase("/authenticationError")) {
+                } else if(decryptedResponse.equalsIgnoreCase("/authenticationFailed")) {
                     return false;
                 }
 
