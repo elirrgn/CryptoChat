@@ -3,6 +3,7 @@ package chat.Client;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class OutputManager implements Runnable {
@@ -19,10 +20,14 @@ public class OutputManager implements Runnable {
     @Override
     public void run() {
         while(true) {
-            String msg = input.nextLine();
-            sendMsg(msg);
-            if (!msg.startsWith("/")) {
-                
+            try {
+                String msg = input.nextLine();
+                sendMsg(msg);
+                if (!msg.startsWith("/")) {
+                    
+                }
+            } catch(NoSuchElementException e) {
+                return;
             }
         }
     }

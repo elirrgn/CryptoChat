@@ -8,10 +8,12 @@ import java.net.Socket;
 import chat.Shared.PacketManager;
 
 public class ClientManager implements Runnable {
+    private String nome;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public ClientManager(Socket socket, ObjectOutputStream out, ObjectInputStream in) throws IOException {
+    public ClientManager(String nome, Socket socket, ObjectOutputStream out, ObjectInputStream in) throws IOException {
+        this.nome = nome;
         this.in = in;
         this.out = out;
 
@@ -36,10 +38,16 @@ public class ClientManager implements Runnable {
                         ClientList.sendAll(msg);
                     }
                 }
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                try {
+                    out.close();
+                    in.close();
+                    ClientList.sendAll(nome, "/disconnected "+ nome);
+                    ClientList.removeClient(nome);
+                    return;
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
         }
     }

@@ -7,6 +7,8 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.SecretKey;
 
+import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.json.JSONObject;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -15,8 +17,14 @@ import chat.Shared.DHKeyExchange;
 import chat.Shared.ManageJson;
 
 public class SecureAuthenticateClient {
+    private static final Logger logger = LogManager.getLogger(Server.class);
+
     private static BigInteger sharedKey;
     private static SecretKey aesKey;
+
+    static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+    }
 
     public static String SecureAuthentication(ObjectOutputStream out, ObjectInputStream in) {
         try {
@@ -77,9 +85,11 @@ public class SecureAuthenticateClient {
                         if(!result) {
                             out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
                             out.flush();
+                            logger.warn("User " + username + " already exists, new user not registered");
                         } else {
                             out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
                             out.flush();
+                            logger.info("User " + username + " registered successfully");
                             return username;
                         }
                         break;
@@ -98,15 +108,21 @@ public class SecureAuthenticateClient {
                         encryptedMessage = (String) in.readObject();
                         psw = AES.decrypt(encryptedMessage, aesKey);
 
-
                         result = login(username, psw);
-                        if(!result) {
-                            out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
-                            out.flush();
+                        if(ClientList.find(username) != null) {
+                            logger.warn("User " + username + " already logged in");
+                            result = false;
                         } else {
-                            out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
-                            out.flush();
-                            return username;
+                            if(!result) {
+                                out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
+                                out.flush();
+                                logger.warn("Failed login attempt for user " + username);
+                            } else {
+                                out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
+                                out.flush();
+                                logger.info("User " + username + " logged in");
+                                return username;
+                            }
                         }
                         break;
                 case "E": return null;

@@ -13,7 +13,7 @@ import chat.Shared.ManageJson;
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
 
-	private static final int PORT=1234;
+	private static final int PORT=8080;
 
     public static void main(String[] args) {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
@@ -29,9 +29,9 @@ public class Server {
                     ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
                     String nome = SecureAuthenticateClient.SecureAuthentication(out, in);
                     if(nome != null) {
-                        logger.info("Client authenticated as "+nome);
                         out.writeObject("/sendPublic");
                         String publicKey = (String) in.readObject();
+                        // System.out.println(publicKey);
                         ManageJson.aggiungiChiavePubblica(nome, publicKey);
                         ClientList.add(clientSocket, out, in, nome);
                     } else {

@@ -14,7 +14,7 @@ import chat.Shared.DHKeyExchange;
 
 public class Client {
     private static final String ADDRESS = "localhost";
-	private static final int PORT=1234;
+	private static final int PORT=8080;
     private static Socket socket;
 
     
@@ -29,6 +29,7 @@ public class Client {
             if(authenticationWithServer(out, in)) {
                 new IOManager(socket, out, in);
             } else {
+                System.out.println("Program closed correctly");
                 return;
             }
 
@@ -62,6 +63,11 @@ public class Client {
                 String encryptedMessage = AES.encrypt(message, aesKey);
                 out.writeObject(encryptedMessage);
                 out.flush();
+                if(message.equalsIgnoreCase("e")) {
+                    out.close();
+                    in.close();
+                    return false;
+                }
             }
         } catch(Exception e) {
             System.err.println(e);

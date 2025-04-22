@@ -1,0 +1,16 @@
+chat\Client\ServerCommandManager.class
+chat\Client\InputManager.class
+chat\Client\OnlineList.class
+chat\Server\SecureAuthenticateClient.class
+chat\Client\Client.class
+chat\Client\IOManager.class
+chat\Shared\PacketManager.class
+chat\Shared\CryptoManager.class
+chat\Shared\AES.class
+chat\Shared\DHKeyExchange.class
+chat\Client\OutputManager.class
+chat\Server\Server.class
+chat\Server\ClientManager.class
+chat\Client\RSAUtils.class
+chat\Server\ClientList.class
+chat\Shared\ManageJson.class
