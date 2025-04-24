@@ -8,7 +8,6 @@ import chat.Shared.PacketManager;
 public class InputManager implements Runnable {
     private ObjectInputStream in;
 
-
     public InputManager(ObjectInputStream in) throws IOException {
         this.in = in;
 
@@ -23,7 +22,8 @@ public class InputManager implements Runnable {
                 if(msg.startsWith("/")) {
                     ServerCommandManager.manageCommand(msg);
                 } else if(PacketManager.checkPacketFormat(msg)) {
-                    // Manage Chat Messages
+                    System.out.println(msg);
+                    // TO-DO packet reception
                 }
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();

@@ -31,11 +31,15 @@ public class ClientManager implements Runnable {
                 String msg = (String) in.readObject();
                 System.out.println(msg);
                 if(PacketManager.checkPacketFormat(msg)) {
+                    String src = PacketManager.getPacketSrc(msg);
                     String dest = PacketManager.getPacketDest(msg);
-                    if(dest != "all") {
+                    System.out.println("Packet correct;;"+src+";;"+dest);
+                    if(!dest.equals("all")) {
+                        System.out.println("DM");
                         ClientList.sendDM(dest, msg);
                     } else {
-                        ClientList.sendAll(msg);
+                        System.out.println("msg to all");
+                        ClientList.sendAll(src, msg);
                     }
                 }
             } catch (Exception e) {

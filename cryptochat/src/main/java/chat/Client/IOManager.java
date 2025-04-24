@@ -22,7 +22,7 @@ public class IOManager {
             OnlineList.loadFromJSON(username);
             ServerCommandManager.addIOManager(this);
             
-            this.outputManager = new OutputManager(out);
+            this.outputManager = new OutputManager(out, this);
             this.inputManager = new InputManager(in);
 
         } catch (Exception e) {
@@ -40,5 +40,9 @@ public class IOManager {
 
     public void sendMsg(String msg) {
         outputManager.sendMsg(msg);
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 }

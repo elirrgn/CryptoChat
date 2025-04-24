@@ -45,9 +45,9 @@ public class ClientList {
         });
     }
 
-    public synchronized static void sendAll(String nome, String msg) throws IOException {
+    public synchronized static void sendAll(String senderNome, String msg) throws IOException {
         managers.forEach((k, value) -> {
-            if(!k.equals(nome)) {
+            if(!k.equals(senderNome)) {
                 try {
                     value.sendMsg(msg);
                 } catch (IOException e) {

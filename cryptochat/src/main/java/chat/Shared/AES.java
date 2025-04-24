@@ -72,4 +72,15 @@ public class AES {
         byte[] decryptedData = cipher.doFinal(encryptedData);
         return new String(decryptedData, StandardCharsets.UTF_8);
     }
+
+    // Convert SecretKey to Base64 String
+    public static String secretKeyToString(SecretKey secretKey) {
+        return Base64.getEncoder().encodeToString(secretKey.getEncoded());
+    }
+
+    // Convert Base64 String to SecretKey
+    public static SecretKey stringToSecretKey(String keyString) {
+        byte[] decodedKey = Base64.getDecoder().decode(keyString);
+        return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+    }
 }
