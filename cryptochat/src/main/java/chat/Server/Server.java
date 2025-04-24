@@ -33,6 +33,7 @@ public class Server {
                         String publicKey = (String) in.readObject();
                         // System.out.println(publicKey);
                         ManageJson.aggiungiChiavePubblica(nome, publicKey);
+                        ClientList.sendAll(nome, "/connected;;"+nome+";;"+publicKey);
                         ClientList.add(clientSocket, out, in, nome);
                     } else {
                         logger.info("Client not authenticated");

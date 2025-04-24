@@ -87,7 +87,7 @@ public class SecureAuthenticateClient {
                             out.flush();
                             logger.warn("User " + username + " already exists, new user not registered");
                         } else {
-                            out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
+                            out.writeObject(AES.encrypt("/authenticationCorrect;;"+username, aesKey));
                             out.flush();
                             logger.info("User " + username + " registered successfully");
                             return username;
@@ -118,7 +118,7 @@ public class SecureAuthenticateClient {
                                 out.flush();
                                 logger.warn("Failed login attempt for user " + username);
                             } else {
-                                out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
+                                out.writeObject(AES.encrypt("/authenticationCorrect;;"+username, aesKey));
                                 out.flush();
                                 logger.info("User " + username + " logged in");
                                 return username;

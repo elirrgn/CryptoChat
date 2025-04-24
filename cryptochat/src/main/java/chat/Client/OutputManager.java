@@ -2,7 +2,6 @@ package chat.Client;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 

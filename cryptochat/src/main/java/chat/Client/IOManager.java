@@ -9,14 +9,17 @@ import java.security.PublicKey;
 
 public class IOManager {
     private Socket socket;
+    private String username;
     private OutputManager outputManager;
     private InputManager inputManager;
     private KeyPair keys;
 
-    public IOManager(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in) {
+    public IOManager(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in, String username) {
         try {
+            this.username = username;
             this.socket = clientSocket;
             this.keys = RSAUtils.generateKeyPair();
+            OnlineList.loadFromJSON(username);
             ServerCommandManager.addIOManager(this);
             
             this.outputManager = new OutputManager(out);

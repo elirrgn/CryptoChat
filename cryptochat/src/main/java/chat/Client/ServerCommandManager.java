@@ -8,15 +8,15 @@ public class ServerCommandManager {
     }
 
     public static void manageCommand(String msg) {
-        String[] splitMsg = msg.split(";");
+        String[] splitMsg = msg.split(";;");
         switch (splitMsg[0]) {
             case "/sendPublic":
                 ioManager.sendMsg(RSAUtils.publicKeyToString(ioManager.getPublicKey()));
                 break;
-            case "/join":
+            case "/connected":
                 OnlineList.addClient(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));
                 break;
-            case "/leave":
+            case "/disconnected":
                 OnlineList.removeClient(splitMsg[1]);
                 break;
             case "/update":

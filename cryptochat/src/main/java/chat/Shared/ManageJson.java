@@ -3,8 +3,12 @@ package chat.Shared;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.PublicKey;
+import java.util.HashMap;
 
 import org.json.JSONObject;
+
+import chat.Client.RSAUtils;
 
 public class ManageJson {
     private static final String USERS_FILE = "users.json";
@@ -53,4 +57,24 @@ public class ManageJson {
             return false;
         }
     }
+
+    public static HashMap<String, PublicKey> getUtentiConPublicKey(String clientName) {
+        HashMap<String, PublicKey> utentiConChiave = new HashMap<>();
+        JSONObject utenti = caricaUtenti();
+
+        for (String username : utenti.keySet()) {
+            if(!username.equals(clientName)) { // Escludo il client che lo richiede
+                JSONObject userInfo = utenti.optJSONObject(username);
+                if (userInfo != null && userInfo.has("publicKey")) {
+                    String publicKey = userInfo.optString("publicKey", null);
+                    if (publicKey != null) {
+                        utentiConChiave.put(username, RSAUtils.stringToPublicKey(publicKey));
+                    }
+                }
+            }
+        }
+
+        return utentiConChiave;
+    }
+
 }

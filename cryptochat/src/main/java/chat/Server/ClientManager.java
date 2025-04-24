@@ -42,7 +42,7 @@ public class ClientManager implements Runnable {
                 try {
                     out.close();
                     in.close();
-                    ClientList.sendAll(nome, "/disconnected "+ nome);
+                    ClientList.sendAll(nome, "/disconnected;;"+ nome);
                     ClientList.removeClient(nome);
                     return;
                 } catch (IOException e1) {

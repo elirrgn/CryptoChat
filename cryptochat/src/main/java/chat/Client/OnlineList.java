@@ -3,15 +3,33 @@ package chat.Client;
 import java.security.PublicKey;
 import java.util.HashMap;
 
+import org.apache.logging.log4j.*;
+import org.apache.logging.log4j.core.config.Configurator;
+
+import chat.Shared.ManageJson;
+
 public class OnlineList {
+    private static final Logger logger = LogManager.getLogger(OnlineList.class);
+
     private static HashMap<String, PublicKey> clientKeys = new HashMap<String, PublicKey>(); // ClientName, Client public Key
     
-    public static void addClient(String clientName, PublicKey publicKey) {
-        clientKeys.put(clientName, publicKey);
+    static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
     }
 
+    public static void loadFromJSON(String username) {
+        clientKeys = ManageJson.getUtentiConPublicKey(username);
+        logger.info("Client Online List Added");
+    }
+
+    public static void addClient(String clientName, PublicKey publicKey) {
+        clientKeys.put(clientName, publicKey);
+        logger.info("Added client: "+clientName+" chiave: "+RSAUtils.publicKeyToString(publicKey));;
+    }
+    
     public static void removeClient(String clientName) {
-        clientKeys.remove(clientName);
+        PublicKey key = clientKeys.remove(clientName);
+        logger.info("Removed client: "+clientName+" chiave: "+RSAUtils.publicKeyToString(key));;
     }
 
     public static void modifyPublicKey(String clientName, PublicKey publicKey) {

@@ -26,8 +26,10 @@ public class Client {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-            if(authenticationWithServer(out, in)) {
-                new IOManager(socket, out, in);
+            String username = authenticationWithServer(out, in);
+            System.out.println(username);
+            if(username != null) {
+                new IOManager(socket, out, in, username);
             } else {
                 System.out.println("Program closed correctly");
                 return;
@@ -39,7 +41,7 @@ public class Client {
 		}
     }
 
-    private static boolean authenticationWithServer(ObjectOutputStream out, ObjectInputStream in) {
+    private static String authenticationWithServer(ObjectOutputStream out, ObjectInputStream in) {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             
@@ -52,10 +54,10 @@ public class Client {
                 String decryptedResponse = AES.decrypt(encryptedResponse, aesKey);
                 System.out.println("Server: " + decryptedResponse);
 
-                if(decryptedResponse.equalsIgnoreCase("/authenticationCorrect")){
-                    return true;
+                if(decryptedResponse.startsWith("/authenticationCorrect")){
+                    return decryptedResponse.split(";;")[1];
                 } else if(decryptedResponse.equalsIgnoreCase("/authenticationFailed")) {
-                    return false;
+                    return null;
                 }
 
                 System.out.print("Client: ");
@@ -66,12 +68,12 @@ public class Client {
                 if(message.equalsIgnoreCase("e")) {
                     out.close();
                     in.close();
-                    return false;
+                    return null;
                 }
             }
         } catch(Exception e) {
             System.err.println(e);
-            return false;
+            return null;
         }
     }
 }
