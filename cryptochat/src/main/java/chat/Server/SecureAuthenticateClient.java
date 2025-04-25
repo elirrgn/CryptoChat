@@ -1,5 +1,6 @@
 package chat.Server;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
@@ -32,7 +33,14 @@ public class SecureAuthenticateClient {
             deriveAESKey();
             return authentication(out, in);
         } catch(Exception e) {
-            System.out.println(e.getLocalizedMessage());
+            try {
+                out.close();
+                in.close();
+                logger.info("Client disconnected");
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+            }
             return null;
         }
     }
@@ -46,6 +54,55 @@ public class SecureAuthenticateClient {
     }
 
     private static String authentication(ObjectOutputStream out, ObjectInputStream in) throws Exception {
+        boolean result = false;
+        while(!result) {
+            String encryptedMessage = (String) in.readObject();
+            String command = AES.decrypt(encryptedMessage, aesKey);
+
+            if(command.startsWith("/login")) {
+                String[] loginCommand = command.split(" ");
+                String username = loginCommand[1];
+                String psw = loginCommand[2];
+                result = login(username, psw);
+
+                if(ClientList.find(username) != null) { // Check if already logged in
+                    logger.warn("User " + username + " already logged in");
+                    result = false;
+                } else {
+                    if(!result) {
+                        out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
+                        out.flush();
+                        logger.warn("Failed login attempt for user " + username);
+                    } else {
+                        out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
+                        out.flush();
+                        logger.info("User " + username + " logged in");
+                        return username;
+                    }
+                }
+            } else if(command.startsWith("/register")) {
+                String[] registerCommand = command.split(" ");
+                String username = registerCommand[1];
+                String psw = registerCommand[2];
+                String hashedPsw = BCrypt.hashpw(psw, BCrypt.gensalt(12)); // 12 hash factor, secure and fast
+                result = register(username, hashedPsw);
+
+                if(!result) {
+                    out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
+                    out.flush();
+                    logger.warn("User " + username + " already exists, new user not registered");
+                } else {
+                    out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
+                    out.flush();
+                    logger.info("User " + username + " registered successfully");
+                    return username;
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String authenticationS(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         boolean result;
         do{
             String message = """ 
@@ -81,7 +138,7 @@ public class SecureAuthenticateClient {
                         encryptedMessage = (String) in.readObject();
                         psw = AES.decrypt(encryptedMessage, aesKey);
                         String hashedPsw = BCrypt.hashpw(psw, BCrypt.gensalt(12)); // 12 fattore abbastanza sicuro e veloce
-                        result = registraUtente(username, hashedPsw);
+                        result = register(username, hashedPsw);
                         if(!result) {
                             out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
                             out.flush();
@@ -132,7 +189,7 @@ public class SecureAuthenticateClient {
         return null;
     }
 
-    private static boolean registraUtente(String username, String hashedPassword) {
+    private static boolean register(String username, String hashedPassword) {
         try {
             JSONObject utenti = ManageJson.caricaUtenti();
     

@@ -13,4 +13,5 @@ chat\Server\Server.class
 chat\Server\ClientManager.class
 chat\Client\RSAUtils.class
 chat\Server\ClientList.class
+chat\Client\ChatGUI.class
 chat\Shared\ManageJson.class

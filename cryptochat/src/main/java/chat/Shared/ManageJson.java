@@ -13,13 +13,14 @@ import chat.Client.RSAUtils;
 public class ManageJson {
     private static final String USERS_FILE = "users.json";
 
-    public static JSONObject caricaUtenti() {
+    public synchronized static JSONObject caricaUtenti() {
         try {
             if (!Files.exists(Paths.get(USERS_FILE))) {
                 return new JSONObject();
             }
 
             String content = new String(Files.readAllBytes(Paths.get(USERS_FILE)));
+            System.out.println(new JSONObject(content));
             return new JSONObject(content);
 
         } catch (Exception e) {
@@ -28,7 +29,7 @@ public class ManageJson {
         }
     }
 
-    public static void salvaUtenti(JSONObject utenti) {
+    public synchronized static void salvaUtenti(JSONObject utenti) {
         try (FileWriter file = new FileWriter(USERS_FILE)) {
             file.write(utenti.toString(4)); // formattato
         } catch (Exception e) {
@@ -36,7 +37,7 @@ public class ManageJson {
         }
     }
 
-    public static boolean aggiungiChiavePubblica(String username, String publicKey) {
+    public synchronized static boolean aggiungiChiavePubblica(String username, String publicKey) {
         try {
             JSONObject utenti = caricaUtenti();
 
@@ -58,23 +59,33 @@ public class ManageJson {
         }
     }
 
-    public static HashMap<String, PublicKey> getUtentiConPublicKey(String clientName) {
+    public synchronized static HashMap<String, PublicKey> getUtentiConPublicKey(String clientName) {
         HashMap<String, PublicKey> utentiConChiave = new HashMap<>();
         JSONObject utenti = caricaUtenti();
-
+        //System.out.println(utenti);
+    
         for (String username : utenti.keySet()) {
-            if(!username.equals(clientName)) { // Escludo il client che lo richiede
-                JSONObject userInfo = utenti.optJSONObject(username);
+            if (!username.equals(clientName)) { // Exclude the requesting client
+                System.out.println(username);
+                JSONObject userInfo = utenti.optJSONObject(username); // Get user info
                 if (userInfo != null && userInfo.has("publicKey")) {
+                    // Check if the user has a publicKey
                     String publicKey = userInfo.optString("publicKey", null);
-                    if (publicKey != null) {
-                        utentiConChiave.put(username, RSAUtils.stringToPublicKey(publicKey));
+                    if (publicKey != null && !publicKey.isEmpty()) {
+                        try {
+                            // Convert the publicKey string to a PublicKey object and add it to the map
+                            PublicKey pubKey = RSAUtils.stringToPublicKey(publicKey);
+                            utentiConChiave.put(username, pubKey);
+                        } catch (Exception e) {
+                            // Handle any exceptions that might arise during publicKey conversion
+                            System.err.println("Error converting public key for " + username + ": " + e.getMessage());
+                        }
                     }
                 }
             }
         }
-
+    
         return utentiConChiave;
     }
-
+    
 }

@@ -11,13 +11,15 @@ public class ServerCommandManager {
         String[] splitMsg = msg.split(";;");
         switch (splitMsg[0]) {
             case "/sendPublic":
-                ioManager.sendMsg(RSAUtils.publicKeyToString(ioManager.getPublicKey()));
+                ioManager.sendToServer(RSAUtils.publicKeyToString(ioManager.getPublicKey()));
                 break;
             case "/connected":
                 OnlineList.addClient(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));
+                ChatGUI.appendMessage(splitMsg[1]+" joined the chat!");
                 break;
             case "/disconnected":
                 OnlineList.removeClient(splitMsg[1]);
+                ChatGUI.appendMessage(splitMsg[1]+" left the chat!");
                 break;
             case "/update":
                 OnlineList.modifyPublicKey(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));

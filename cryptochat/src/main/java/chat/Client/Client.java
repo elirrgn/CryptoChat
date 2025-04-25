@@ -1,7 +1,6 @@
 package chat.Client;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigInteger;
@@ -15,41 +14,49 @@ import chat.Shared.DHKeyExchange;
 public class Client {
     private static final String ADDRESS = "localhost";
 	private static final int PORT=8080;
-    private static Socket socket;
-
+    private Socket socket;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
+    private SecretKey aesKey;
+    private String username;
+    private IOManager ioManager;
     
-    public static void main(String[] args) {
+    public void connectWithServer() {
 		try {
             socket = new Socket(ADDRESS, PORT);
             System.out.println("Connected to server!");
 
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            this.out = new ObjectOutputStream(socket.getOutputStream());
+            this.in = new ObjectInputStream(socket.getInputStream());
 
-            String username = authenticationWithServer(out, in);
-            System.out.println(username);
-            if(username != null) {
-                new IOManager(socket, out, in, username);
-            } else {
-                System.out.println("Program closed correctly");
-                return;
-            }
-
+            BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
+            this.aesKey = AES.deriveAESKey(sharedKey.toByteArray());
 		} catch (Exception e) {
 			System.out.println("Host ID not found!");
 			System.exit(1);
 		}
     }
 
-    private static String authenticationWithServer(ObjectOutputStream out, ObjectInputStream in) {
+    public boolean loginOrRegister(String action, String username, String password) {
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            
-            BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
-            
-            SecretKey aesKey = AES.deriveAESKey(sharedKey.toByteArray());
+            String loginMsg = "/"+action+" "+username+" "+password;
+            String encryptedMsg = AES.encrypt(loginMsg, aesKey);
+            out.writeObject(encryptedMsg);
+            out.flush();
 
-            while (true) {
+            String response = (String) in.readObject();
+            String decryptedResponse = AES.decrypt(response, aesKey);
+
+            if(decryptedResponse.equals("/authenticationCorrect")){
+                this.username = username;
+
+                this.ioManager = new IOManager(socket, out, in, username);
+                
+                return true;
+            } else if(decryptedResponse.equals("/authenticationFailed")) {
+                return false;
+            }
+            /*while (true) {
                 String encryptedResponse = (String) in.readObject();
                 String decryptedResponse = AES.decrypt(encryptedResponse, aesKey);
                 System.out.println("Server: " + decryptedResponse);
@@ -70,10 +77,24 @@ public class Client {
                     in.close();
                     return null;
                 }
-            }
+            }*/
         } catch(Exception e) {
             System.err.println(e);
-            return null;
+            return false;
         }
+        return false;
+    }
+
+    public void disconnect() {
+        try {
+            socket.close();
+            System.exit(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMsg(String msg) {
+        ioManager.sendMsg(msg);
     }
 }

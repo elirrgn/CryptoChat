@@ -23,10 +23,11 @@ public class InputManager implements Runnable {
                     ServerCommandManager.manageCommand(msg);
                 } else if(PacketManager.checkPacketFormat(msg)) {
                     System.out.println(msg);
+                    ChatGUI.appendMessage(msg);
                     // TO-DO packet reception
                 }
             } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
+                return;
             }
         }
     }

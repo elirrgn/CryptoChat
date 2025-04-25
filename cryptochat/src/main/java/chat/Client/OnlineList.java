@@ -19,17 +19,19 @@ public class OnlineList {
 
     public static void loadFromJSON(String username) {
         clientKeys = ManageJson.getUtentiConPublicKey(username);
+        ChatGUI.loadOnlineClients(clientKeys.keySet());
         logger.info("Client Online List Added");
     }
 
     public static void addClient(String clientName, PublicKey publicKey) {
         clientKeys.put(clientName, publicKey);
-        logger.info("Added client: "+clientName+" chiave: "+RSAUtils.publicKeyToString(publicKey));;
+        ChatGUI.addOnlineUser(clientName);
+        logger.info("Added client: "+clientName);;
     }
     
     public static void removeClient(String clientName) {
-        PublicKey key = clientKeys.remove(clientName);
-        logger.info("Removed client: "+clientName+" chiave: "+RSAUtils.publicKeyToString(key));;
+        logger.info("Removed client: "+clientName);;
+        ChatGUI.removeOnlineUser(clientName);
     }
 
     public static void modifyPublicKey(String clientName, PublicKey publicKey) {

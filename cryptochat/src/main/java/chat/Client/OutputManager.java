@@ -11,7 +11,7 @@ import javax.crypto.SecretKey;
 import chat.Shared.AES;
 import chat.Shared.PacketManager;
 
-public class OutputManager implements Runnable {
+public class OutputManager {
     private ObjectOutputStream out;
     private Scanner input;
     private IOManager ioManager;
@@ -21,10 +21,10 @@ public class OutputManager implements Runnable {
         this.ioManager = ioManager;
         this.input = new Scanner(System.in);
 
-        new Thread(this).start();
+        //new Thread(this).start();
     }
 
-    @Override
+    /*@Override
     public void run() {
         while(true) {
             try {
@@ -41,13 +41,16 @@ public class OutputManager implements Runnable {
 
                     }
                 } else {
-                    // TO-DO commands management (ex. DM)
+                    if(msg.startsWith("/DM")) {
+                        
+                    }
                 }
             } catch(NoSuchElementException e) {
                 return;
             }
         }
     }
+    */
     
     public void sendMsg(String msg) {
         try {
