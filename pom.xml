@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>chat</groupId>
-    <artifactId>cryptochat</artifactId>
+    <artifactId>CryptoChat</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -93,7 +93,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>chat.Client.ChatGUI</mainClass> <!-- replace with actual class -->
+                    <mainClass>chat.Client.ChatGUI</mainClass>
                 </configuration>
             </plugin>
 
@@ -107,7 +107,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>chat.Client.ChatGUI</mainClass> <!-- replace if different -->
+                            <mainClass>chat.Client.ChatGUI</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
