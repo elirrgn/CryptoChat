@@ -18,7 +18,7 @@ import chat.Shared.AES;
 import chat.Shared.PacketManager;
 
 public class IOManager {
-    private static final Logger logger = LogManager.getLogger(InputManager.class);
+    private static final Logger logger = LogManager.getLogger(IOManager.class);
     static {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
     }

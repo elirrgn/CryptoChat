@@ -18,7 +18,7 @@ import chat.Shared.DHKeyExchange;
 import chat.Shared.ManageJson;
 
 public class SecureAuthenticateClient {
-    private static final Logger logger = LogManager.getLogger(Server.class);
+    private static final Logger logger = LogManager.getLogger(SecureAuthenticateClient.class);
 
     private static final Object syncLock = new Object(); // Lock object for synchronization
 
