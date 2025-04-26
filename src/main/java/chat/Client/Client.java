@@ -25,11 +25,13 @@ public class Client {
 		try {
             socket = new Socket(ADDRESS, PORT);
 
+            
             this.out = new ObjectOutputStream(socket.getOutputStream());
             this.in = new ObjectInputStream(socket.getInputStream());
-
+            
             BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
             this.aesKey = AES.deriveAESKey(sharedKey.toByteArray());
+
 		} catch (Exception e) {
 			System.exit(1);
 		}
@@ -48,6 +50,7 @@ public class Client {
             if(decryptedResponse.equals("/authenticationCorrect")){
                 this.username = username;
                 System.out.println(username+" loggedin");
+                ChatGUI.setPrimaryStageTitle(username+ " welcome to CryptoChat!");
                 this.ioManager = new IOManager(socket, out, in, username);
                 
                 return true;
@@ -70,7 +73,7 @@ public class Client {
         }
     }
 
-    public void sendMsg(String msg) {
-        ioManager.sendMsg(msg);
+    public String sendMsg(String msg) {
+        return ioManager.sendMsg(msg);
     }
 }

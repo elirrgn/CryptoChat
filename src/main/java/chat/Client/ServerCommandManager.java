@@ -14,15 +14,17 @@ public class ServerCommandManager {
                 ioManager.sendToServer(RSAUtils.publicKeyToString(ioManager.getPublicKey()));
                 break;
             case "/connected":
-                OnlineList.addClient(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));
-                ChatGUI.appendMessage(splitMsg[1]+" joined the chat!");
+                try {
+                    OnlineList.addClient(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                ChatGUI.appendMessage(splitMsg[1]+" joined the chat!", "#7F8C8D");
                 break;
             case "/disconnected":
                 OnlineList.removeClient(splitMsg[1]);
-                ChatGUI.appendMessage(splitMsg[1]+" left the chat!");
-                break;
-            case "/update":
-                OnlineList.modifyPublicKey(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));
+                ChatGUI.appendMessage(splitMsg[1]+" left the chat!", "#7F8C8D");
                 break;
             default:
                 break;

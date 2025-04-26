@@ -50,6 +50,7 @@ public class ClientList {
             if(!k.equals(senderNome)) {
                 try {
                     value.sendMsg(msg);
+                    System.out.println(k+" message sent");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

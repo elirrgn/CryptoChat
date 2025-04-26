@@ -80,7 +80,6 @@ public class SecureAuthenticateClient {
                         out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
                         out.flush();
                         logger.warn("Failed login attempt for user " + username);
-                        return null;
                     } else {
                         out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
                         out.flush();
@@ -99,7 +98,6 @@ public class SecureAuthenticateClient {
                     out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
                     out.flush();
                     logger.warn("User " + username + " already exists, new user not registered");
-                    return null;
                 } else {
                     out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
                     out.flush();
@@ -108,93 +106,6 @@ public class SecureAuthenticateClient {
                 }
             }
         }
-        return null;
-    }
-
-    private String authenticationS(ObjectOutputStream out, ObjectInputStream in) throws Exception {
-        boolean result;
-        do{
-            String message = """ 
-            Inserisci il comando corretto:
-                R: Registrati
-                L: Login
-                E: ESCI
-            """;
-            String encryptedResponse = AES.encrypt(message, aesKey);
-            out.writeObject(encryptedResponse);
-            out.flush();
-            String encryptedMessage = (String) in.readObject();
-            String command = AES.decrypt(encryptedMessage, aesKey);
-            
-            String username;
-            String psw;
-            switch(command.toUpperCase()) {
-                case "R": 
-                        message = "Inserisci l'username!";
-                        encryptedResponse = AES.encrypt(message, aesKey);
-                        out.writeObject(encryptedResponse);
-                        out.flush();
-                
-                        encryptedMessage = (String) in.readObject();
-                        username = AES.decrypt(encryptedMessage, aesKey);
-                        
-                        
-                        message = "Inserisci la password!";
-                        encryptedResponse = AES.encrypt(message, aesKey);
-                        out.writeObject(encryptedResponse);
-                        out.flush();
-                
-                        encryptedMessage = (String) in.readObject();
-                        psw = AES.decrypt(encryptedMessage, aesKey);
-                        String hashedPsw = BCrypt.hashpw(psw, BCrypt.gensalt(12)); // 12 fattore abbastanza sicuro e veloce
-                        result = register(username, hashedPsw);
-                        if(!result) {
-                            out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
-                            out.flush();
-                            logger.warn("User " + username + " already exists, new user not registered");
-                        } else {
-                            out.writeObject(AES.encrypt("/authenticationCorrect;;"+username, aesKey));
-                            out.flush();
-                            logger.info("User " + username + " registered successfully");
-                            return username;
-                        }
-                        break;
-                case "L": 
-                        message = "Inserisci l'username!";
-                        encryptedResponse = AES.encrypt(message, aesKey);
-                        out.writeObject(encryptedResponse);
-                        out.flush();
-                        encryptedMessage = (String) in.readObject();
-                        username = AES.decrypt(encryptedMessage, aesKey);
-                        
-                        message = "Inserisci la password!";
-                        encryptedResponse = AES.encrypt(message, aesKey);
-                        out.writeObject(encryptedResponse);
-                        out.flush();
-                        encryptedMessage = (String) in.readObject();
-                        psw = AES.decrypt(encryptedMessage, aesKey);
-
-                        result = login(username, psw);
-                        if(ClientList.find(username) != null) {
-                            logger.warn("User " + username + " already logged in");
-                            result = false;
-                        } else {
-                            if(!result) {
-                                out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
-                                out.flush();
-                                logger.warn("Failed login attempt for user " + username);
-                            } else {
-                                out.writeObject(AES.encrypt("/authenticationCorrect;;"+username, aesKey));
-                                out.flush();
-                                logger.info("User " + username + " logged in");
-                                return username;
-                            }
-                        }
-                        break;
-                case "E": return null;
-                default: result = false; 
-            }
-        } while (!result);
         return null;
     }
 

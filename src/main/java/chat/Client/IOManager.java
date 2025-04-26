@@ -1,6 +1,5 @@
 package chat.Client;
 
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -29,7 +28,7 @@ public class IOManager {
             ServerCommandManager.addIOManager(this);
             
             this.outputManager = new OutputManager(out, this);
-            this.inputManager = new InputManager(in);
+            this.inputManager = new InputManager(in, this);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,23 +43,48 @@ public class IOManager {
         return keys.getPrivate();
     }
 
-    public void sendMsg(String msg) {
+    public String sendMsg(String msg) {
         if(!msg.startsWith("/")) {
             try {
                 SecretKey aesKey = AES.generateAESKey();
                 String stringAesKey = AES.secretKeyToString(aesKey);
                 String encryptedMsg = AES.encrypt(msg, aesKey);
-                String encryptedAesKey = RSAUtils.encrypt(stringAesKey, this.getPrivateKey());
+                String encryptedAesKey = RSAUtils.encryptWithPrivateKey(stringAesKey, this.getPrivateKey());
                 String packet = PacketManager.createMsgPacket(this.username, "all", encryptedMsg, encryptedAesKey);
                 outputManager.sendMsg(packet);
+                return null;
             } catch (Exception e) {
-
+                return "Error! Message not sent";
             }
         } else {
             if(msg.startsWith("/DM")) {
-                
+                try {
+                    String[] command = msg.split(";;");
+                    String dest = command[1];
+                    String msgString = command[2];
+
+                    SecretKey aesKey = AES.generateAESKey();
+                    String stringAesKey = AES.secretKeyToString(aesKey);
+                    String encryptedMsg = AES.encrypt(msgString, aesKey);
+
+                    if(OnlineList.getClientKey(dest) != null) {
+                        String firstEncryptedAesKey = RSAUtils.encryptWithPublicKey(stringAesKey, OnlineList.getClientKey(dest));
+
+                        String secondEncryptedAesKey = RSAUtils.encryptWithPrivateKey(firstEncryptedAesKey, this.getPrivateKey());
+
+                        String packet = PacketManager.createMsgPacket(this.username, dest, encryptedMsg, secondEncryptedAesKey);
+                        outputManager.sendMsg(packet);
+                        return null;
+                    } else {
+                        return "Client not found! Message not sent";
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    return "Message format error, message not sent!";
+                }
             }
         }
+        return "Error!";
     }
 
     public void sendToServer(String msg) {

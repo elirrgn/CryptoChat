@@ -2,14 +2,7 @@ package chat.Client;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
-
-import javax.crypto.SecretKey;
-
-import chat.Shared.AES;
-import chat.Shared.PacketManager;
 
 public class OutputManager {
     private ObjectOutputStream out;
