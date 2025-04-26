@@ -1,5 +1,9 @@
 package chat.Shared;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.Cipher;
@@ -12,7 +16,10 @@ import java.security.*;
 import java.util.Base64;
 
 public class AES {
+    private static final Logger logger = LogManager.getLogger(AES.class);
+
     static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -24,18 +31,24 @@ public class AES {
     public static SecretKey generateAESKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(AES_KEY_SIZE, new SecureRandom());
-        return keyGen.generateKey();
+        SecretKey aesKey = keyGen.generateKey();
+        logger.debug("AES key generated.");
+        return aesKey;
     }
 
     // Convert shared secret into AES Key
     public static SecretKey deriveAESKey(byte[] sharedSecret) throws NoSuchAlgorithmException {
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         byte[] key = sha.digest(sharedSecret);
-        return new SecretKeySpec(key, "AES");
+        SecretKeySpec derivedKey = new SecretKeySpec(key, "AES");
+        logger.debug("AES key derived from shared secret.");
+        return derivedKey;
     }
 
     // Encrypt using AES-GCM
     public static String encrypt(String plaintext, SecretKey key) throws Exception {
+        logger.debug("Encrypting data using AES-GCM.");
+
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
 
         byte[] iv = new byte[GCM_IV_LENGTH];
@@ -51,11 +64,14 @@ public class AES {
         System.arraycopy(iv, 0, combined, 0, iv.length);
         System.arraycopy(encryptedData, 0, combined, iv.length, encryptedData.length);
 
+        logger.info("Message encrypted");
         return Base64.getEncoder().encodeToString(combined);
     }
 
     // Decrypt using AES-GCM
     public static String decrypt(String ciphertext, SecretKey key) throws Exception {
+        logger.debug("Decrypting data using AES-GCM.");
+
         byte[] decoded = Base64.getDecoder().decode(ciphertext);
 
         // Extract IV and Ciphertext
@@ -70,6 +86,8 @@ public class AES {
         cipher.init(Cipher.DECRYPT_MODE, key, gcmSpec);
 
         byte[] decryptedData = cipher.doFinal(encryptedData);
+        
+        logger.info("Message decrypted");
         return new String(decryptedData, StandardCharsets.UTF_8);
     }
 

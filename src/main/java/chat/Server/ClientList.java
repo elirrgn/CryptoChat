@@ -14,25 +14,25 @@ import chat.Shared.ManageJson;
 public class ClientList {
     private static final Logger logger = LogManager.getLogger(ClientList.class);
 
-    private static HashMap<String, Socket> list = new HashMap<String, Socket>(); // nome -> Socket
-    private static HashMap<String, ClientManager> managers = new HashMap<String,ClientManager>(); // nome -> manager
+    private static HashMap<String, Socket> list = new HashMap<String, Socket>(); // name -> Socket
+    private static HashMap<String, ClientManager> managers = new HashMap<String,ClientManager>(); // name -> manager
     
     static {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
     }
 
-    public synchronized static void add(Socket client, ObjectOutputStream out, ObjectInputStream in, String nome) {
-        list.put(nome, client);
+    public synchronized static void add(Socket client, ObjectOutputStream out, ObjectInputStream in, String name) {
+        list.put(name, client);
         try {
-            managers.put(nome, new ClientManager(nome, client, out, in));
+            managers.put(name, new ClientManager(name, client, out, in));
+            logger.info(name+" joined the chat");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error adding client", e);
         }
-        logger.info(nome+" joined the chat");
     }
 
-    public synchronized static void sendDM(String nomeDest, String msg) throws IOException {
-        managers.get(nomeDest).sendMsg(msg);
+    public synchronized static void sendDM(String destinationName, String msg) throws IOException {
+        managers.get(destinationName).sendMsg(msg);
     }
 
     public synchronized static void sendAll(String msg) throws IOException {
@@ -40,32 +40,31 @@ public class ClientList {
             try {
                 value.sendMsg(msg);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Error sending message to " + k, e);
             }
         });
     }
 
-    public synchronized static void sendAll(String senderNome, String msg) throws IOException {
+    public synchronized static void sendAll(String senderName, String msg) throws IOException {
         managers.forEach((k, value) -> {
-            if(!k.equals(senderNome)) {
+            if(!k.equals(senderName)) {
                 try {
                     value.sendMsg(msg);
-                    System.out.println(k+" message sent");
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Error sending message to " + k, e);
                 }
             }
         });
     }
 
-    public synchronized static void removeClient(String nome) {
-        list.remove(nome);
-        managers.remove(nome);
-        ManageJson.aggiungiChiavePubblica(nome, null);
-        logger.info(nome+" left the chat");
+    public synchronized static void removeClient(String name) {
+        list.remove(name);
+        managers.remove(name);
+        ManageJson.addOrEditPublicKey(name, null);
+        logger.info(name+" left the chat");
     }
 
-    public synchronized static Socket find(String nome) {
-        return list.get(nome);
+    public synchronized static Socket find(String name) {
+        return list.get(name);
     }
 }

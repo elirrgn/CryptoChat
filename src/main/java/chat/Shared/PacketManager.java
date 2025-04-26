@@ -1,10 +1,19 @@
 package chat.Shared;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 import org.json.JSONTokener;
 
 public class PacketManager {
+    private static final Logger logger = LogManager.getLogger(PacketManager.class);
+    static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+    }
+
     public static String createMsgPacket(String src, String dest, String msg, String AESkey) {
         String packet = new JSONStringer()
             .object()
@@ -22,6 +31,7 @@ public class PacketManager {
             .endObject()
             .toString();
 
+        logger.debug("Message packet created: ", packet);
         return packet;
     }
 
@@ -32,7 +42,9 @@ public class PacketManager {
             obj.get("dest");
             obj.get("msg");
             obj.get("key");
+            logger.info("Packet format is valid.");
         } catch(Exception e) {
+            logger.error("Invalid packet format: ", packet, e);
             return false;
         }
         return true;

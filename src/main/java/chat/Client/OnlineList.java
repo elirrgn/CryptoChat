@@ -18,7 +18,7 @@ public class OnlineList {
     }
 
     public static void loadFromJSON(String username) {
-        clientKeys = ManageJson.getUtentiConPublicKey(username);
+        clientKeys = ManageJson.getUsersWithPublicKey(username);
         ChatGUI.loadOnlineClients(clientKeys.keySet());
         logger.info("Client Online List Added");
     }
@@ -30,8 +30,9 @@ public class OnlineList {
     }
     
     public static void removeClient(String clientName) {
-        logger.info("Removed client: "+clientName);;
+        clientKeys.remove(clientName);
         ChatGUI.removeOnlineUser(clientName);
+        logger.info("Removed client: "+clientName);;
     }
 
     public static void modifyPublicKey(String clientName, PublicKey publicKey) {

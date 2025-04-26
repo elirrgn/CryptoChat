@@ -9,10 +9,20 @@ import java.security.PublicKey;
 
 import javax.crypto.SecretKey;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+
 import chat.Shared.AES;
 import chat.Shared.PacketManager;
 
 public class IOManager {
+    private static final Logger logger = LogManager.getLogger(InputManager.class);
+    static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+    }
+
     private Socket socket;
     private String username;
     private OutputManager outputManager;
@@ -30,8 +40,10 @@ public class IOManager {
             this.outputManager = new OutputManager(out, this);
             this.inputManager = new InputManager(in, this);
 
+            logger.info("IOManager initialized for user: {}", username);
+
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error initializing IOManager for user {}: {}", username, e.getMessage());
         }
     }
 
@@ -51,9 +63,13 @@ public class IOManager {
                 String encryptedMsg = AES.encrypt(msg, aesKey);
                 String encryptedAesKey = RSAUtils.encryptWithPrivateKey(stringAesKey, this.getPrivateKey());
                 String packet = PacketManager.createMsgPacket(this.username, "all", encryptedMsg, encryptedAesKey);
+                
+                logger.info("Sending message to all: {}", msg);
+
                 outputManager.sendMsg(packet);
                 return null;
             } catch (Exception e) {
+                logger.error("Error sending message to all: {}", e.getMessage());
                 return "Error! Message not sent";
             }
         } else {
@@ -73,21 +89,29 @@ public class IOManager {
                         String secondEncryptedAesKey = RSAUtils.encryptWithPrivateKey(firstEncryptedAesKey, this.getPrivateKey());
 
                         String packet = PacketManager.createMsgPacket(this.username, dest, encryptedMsg, secondEncryptedAesKey);
+
+                        logger.info("Sending direct message to {}: {}", dest, msgString);
+
                         outputManager.sendMsg(packet);
                         return null;
                     } else {
+                        logger.warn("Client {} not found for direct message", dest);
                         return "Client not found! Message not sent";
                     }
                 } catch(Exception e) {
-                    e.printStackTrace();
+                    logger.error("Error processing direct message: {}", e.getMessage());
                     return "Message format error, message not sent!";
                 }
+            } else if(msg.startsWith("/help")) {
+                outputManager.sendMsg(msg);
+                return null;
             }
         }
-        return "Error!";
+        return "Invalid command!";
     }
 
     public void sendToServer(String msg) {
+        logger.info("Sending message to server: {}", msg);
         outputManager.sendMsg(msg);
     }
 

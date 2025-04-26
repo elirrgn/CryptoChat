@@ -1,5 +1,9 @@
 package chat.Client;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.Cipher;
@@ -13,7 +17,9 @@ import java.util.List;
 
 public class RSAUtils {
 
+    private static final Logger logger = LogManager.getLogger(RSAUtils.class);
     static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -25,7 +31,9 @@ public class RSAUtils {
     public static KeyPair generateKeyPair() throws Exception {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
         keyGen.initialize(RSA_KEY_SIZE);
-        return keyGen.generateKeyPair();
+        KeyPair keyPair = keyGen.generateKeyPair();
+        logger.info("RSA key pair generated successfully.");
+        return keyPair;
     }
 
     // Encrypt with the foreign public key
@@ -44,6 +52,8 @@ public class RSAUtils {
         }
 
         byte[] finalEncrypted = joinChunks(encryptedChunks);
+        logger.info("Data encrypted successfully.");
+
         return Base64.getEncoder().encodeToString(finalEncrypted);
     }
 
@@ -63,6 +73,8 @@ public class RSAUtils {
         }
 
         byte[] finalEncrypted = joinChunks(encryptedChunks);
+
+        logger.info("Data encrypted successfully.");
         return Base64.getEncoder().encodeToString(finalEncrypted);
     }
 
@@ -82,6 +94,8 @@ public class RSAUtils {
         }
 
         byte[] finalDecrypted = joinChunks(decryptedChunks);
+
+        logger.info("Data decrypted successfully.");
         return new String(finalDecrypted, StandardCharsets.UTF_8);
     }
 
@@ -101,6 +115,8 @@ public class RSAUtils {
         }
 
         byte[] finalDecrypted = joinChunks(decryptedChunks);
+        
+        logger.info("Data decrypted successfully.");
         return new String(finalDecrypted, StandardCharsets.UTF_8);
     }
 

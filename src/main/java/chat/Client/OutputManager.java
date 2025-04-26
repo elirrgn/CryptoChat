@@ -13,37 +13,7 @@ public class OutputManager {
         this.out = out;
         this.ioManager = ioManager;
         this.input = new Scanner(System.in);
-
-        //new Thread(this).start();
     }
-
-    /*@Override
-    public void run() {
-        while(true) {
-            try {
-                String msg = input.nextLine();
-                if(!msg.startsWith("/")) {
-                    try {
-                        SecretKey aesKey = AES.generateAESKey();
-                        String stringAesKey = AES.secretKeyToString(aesKey);
-                        String encryptedMsg = AES.encrypt(msg, aesKey);
-                        String encryptedAesKey = RSAUtils.encrypt(encryptedMsg, ioManager.getPrivateKey());
-                        String packet = PacketManager.createMsgPacket(ioManager.getUsername(), "all", encryptedMsg, encryptedAesKey);
-                        sendMsg(packet);
-                    } catch (Exception e) {
-
-                    }
-                } else {
-                    if(msg.startsWith("/DM")) {
-                        
-                    }
-                }
-            } catch(NoSuchElementException e) {
-                return;
-            }
-        }
-    }
-    */
     
     public void sendMsg(String msg) {
         try {

@@ -8,10 +8,20 @@ import java.net.Socket;
 
 import javax.crypto.SecretKey;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+
 import chat.Shared.AES;
 import chat.Shared.DHKeyExchange;
 
 public class Client {
+    private static final Logger logger = LogManager.getLogger(Client.class);
+    static {
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+    }
+
     private static final String ADDRESS = "localhost";
 	private static final int PORT=8080;
     private Socket socket;
@@ -24,21 +34,24 @@ public class Client {
     public void connectWithServer() {
 		try {
             socket = new Socket(ADDRESS, PORT);
-
+            logger.info("Attempting to connect to server at {}:{}", ADDRESS, PORT);
             
             this.out = new ObjectOutputStream(socket.getOutputStream());
             this.in = new ObjectInputStream(socket.getInputStream());
+            logger.info("Connection established. Performing DH Key Exchange...");
             
             BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
             this.aesKey = AES.deriveAESKey(sharedKey.toByteArray());
-
+            logger.info("Key exchange successful. AES Key derived.");
 		} catch (Exception e) {
+            logger.error("Error while connecting to server or performing key exchange", e);
 			System.exit(1);
 		}
     }
 
     public boolean loginOrRegister(String action, String username, String password) {
         try {
+            logger.info("Attempting {} with username: {}", action, username);
             String loginMsg = "/"+action+" "+username+" "+password;
             String encryptedMsg = AES.encrypt(loginMsg, aesKey);
             out.writeObject(encryptedMsg);
@@ -49,16 +62,16 @@ public class Client {
 
             if(decryptedResponse.equals("/authenticationCorrect")){
                 this.username = username;
-                System.out.println(username+" loggedin");
+                logger.info("{} logged in successfully", username);
                 ChatGUI.setPrimaryStageTitle(username+ " welcome to CryptoChat!");
                 this.ioManager = new IOManager(socket, out, in, username);
-                
                 return true;
             } else if(decryptedResponse.equals("/authenticationFailed")) {
+                logger.warn("Authentication failed for username: {}", username);
                 return false;
             }
         } catch(Exception e) {
-            System.err.println(e);
+            logger.error("Error during authentication for username: {}", username, e);
             return false;
         }
         return false;
@@ -66,10 +79,11 @@ public class Client {
 
     public void disconnect() {
         try {
+            logger.info("Disconnecting from server...");
             socket.close();
             System.exit(0);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error while disconnecting from server", e);
         }
     }
 

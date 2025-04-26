@@ -21,11 +21,11 @@ public class Server {
             logger.info("Waiting for clients on port: " + PORT);
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                System.out.println("Shutting down server...");
+                logger.info("Server shutting down...");
                 try {
                     serverSocket.close();
                 } catch (IOException e) {
-                    // Ignore
+                    logger.error("Error handling server socket: " + e.getMessage());
                 }
             }));
 
@@ -37,7 +37,7 @@ public class Server {
                 new Thread(() -> handleClientAuthentication(clientSocket)).start();
             }
         } catch (Exception e) {
-            System.err.println("Error handling server socket: " + e.getMessage());
+            logger.error("Error handling server socket: " + e.getMessage());
         }
     }
 
@@ -51,7 +51,7 @@ public class Server {
                 out.writeObject("/sendPublic");
                 out.flush();
                 String publicKey = (String) in.readObject();
-                ManageJson.aggiungiChiavePubblica(nome, publicKey);
+                ManageJson.addOrEditPublicKey(nome, publicKey);
                 ClientList.sendAll(nome, "/connected;;" + nome + ";;" + publicKey);
                 ClientList.add(clientSocket, out, in, nome);
                 logger.info("Client " + nome + " authenticated and added to ClientList");

@@ -37,14 +37,13 @@ public class SecureAuthenticateClient {
             }
             return authentication(out, in);
         } catch(Exception e) {
+            logger.error("Error during key exchange or AES key derivation", e);
             try {
+                logger.info("Client failed to authenticate, closing connection");
                 out.close();
                 in.close();
-                System.err.println(e);
-                logger.info("Client disconnected");
             } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                System.err.println(e1);
+                
             }
             return null;
         }
@@ -111,7 +110,7 @@ public class SecureAuthenticateClient {
 
     private static boolean register(String username, String hashedPassword) {
         try {
-            JSONObject utenti = ManageJson.caricaUtenti();
+            JSONObject utenti = ManageJson.loadUsersFromFile();
     
             if (utenti.has(username)) {
                 return false; // utente già registrato
@@ -123,7 +122,7 @@ public class SecureAuthenticateClient {
     
             // Salva nel file
             utenti.put(username, userObj);
-            ManageJson.salvaUtenti(utenti);
+            ManageJson.saveUsersToFile(utenti);
             return true;
     
         } catch (Exception e) {
@@ -134,7 +133,7 @@ public class SecureAuthenticateClient {
 
     private static boolean login(String username, String password) {
         try {
-            JSONObject utenti = ManageJson.caricaUtenti();
+            JSONObject utenti = ManageJson.loadUsersFromFile();
     
             if (!utenti.has(username)) {
                 return false; // utente non esiste
