@@ -24,7 +24,6 @@ public class Client {
     public void connectWithServer() {
 		try {
             socket = new Socket(ADDRESS, PORT);
-            System.out.println("Connected to server!");
 
             this.out = new ObjectOutputStream(socket.getOutputStream());
             this.in = new ObjectInputStream(socket.getInputStream());
@@ -32,7 +31,6 @@ public class Client {
             BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
             this.aesKey = AES.deriveAESKey(sharedKey.toByteArray());
 		} catch (Exception e) {
-			System.out.println("Host ID not found!");
 			System.exit(1);
 		}
     }
@@ -49,35 +47,13 @@ public class Client {
 
             if(decryptedResponse.equals("/authenticationCorrect")){
                 this.username = username;
-
+                System.out.println(username+" loggedin");
                 this.ioManager = new IOManager(socket, out, in, username);
                 
                 return true;
             } else if(decryptedResponse.equals("/authenticationFailed")) {
                 return false;
             }
-            /*while (true) {
-                String encryptedResponse = (String) in.readObject();
-                String decryptedResponse = AES.decrypt(encryptedResponse, aesKey);
-                System.out.println("Server: " + decryptedResponse);
-
-                if(decryptedResponse.startsWith("/authenticationCorrect")){
-                    return decryptedResponse.split(";;")[1];
-                } else if(decryptedResponse.equalsIgnoreCase("/authenticationFailed")) {
-                    return null;
-                }
-
-                System.out.print("Client: ");
-                String message = reader.readLine();
-                String encryptedMessage = AES.encrypt(message, aesKey);
-                out.writeObject(encryptedMessage);
-                out.flush();
-                if(message.equalsIgnoreCase("e")) {
-                    out.close();
-                    in.close();
-                    return null;
-                }
-            }*/
         } catch(Exception e) {
             System.err.println(e);
             return false;

@@ -18,12 +18,8 @@ public class DHKeyExchange {
         
         BigInteger otherPublic = (BigInteger) in.readObject();
         
-        System.out.println("Key read");
-
         out.writeObject(myPublicKey);
         out.flush();
-
-        System.out.println("Key Sent");
         
         BigInteger sharedKey = otherPublic.modPow(myPrivateKey, p);
     
@@ -34,16 +30,10 @@ public class DHKeyExchange {
         BigInteger myPrivateKey = new BigInteger(256, new SecureRandom());
         BigInteger myPublicKey = g.modPow(myPrivateKey, p);
         
-        System.out.println("Problemi");
-
         out.writeObject(myPublicKey);
         out.flush();
 
-        System.out.println("Key Sent");
-
         BigInteger otherPublic = (BigInteger) in.readObject();
-
-        System.out.println("key read");
 
         BigInteger sharedKey = otherPublic.modPow(myPrivateKey, p);
     

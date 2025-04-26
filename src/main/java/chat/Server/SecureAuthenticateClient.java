@@ -20,40 +20,45 @@ import chat.Shared.ManageJson;
 public class SecureAuthenticateClient {
     private static final Logger logger = LogManager.getLogger(Server.class);
 
-    private static BigInteger sharedKey;
-    private static SecretKey aesKey;
+    private static final Object syncLock = new Object(); // Lock object for synchronization
+
+    private BigInteger sharedKey;
+    private SecretKey aesKey;
 
     static {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
     }
 
-    public static String SecureAuthentication(ObjectOutputStream out, ObjectInputStream in) {
+    public String SecureAuthentication(ObjectOutputStream out, ObjectInputStream in) {
         try {
-            keyExchange(out, in);
-            deriveAESKey();
+            synchronized (syncLock) {
+                keyExchange(out, in); // Synchronize key exchange
+                deriveAESKey(); // Synchronize AES key derivation
+            }
             return authentication(out, in);
         } catch(Exception e) {
             try {
                 out.close();
                 in.close();
+                System.err.println(e);
                 logger.info("Client disconnected");
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
-                e1.printStackTrace();
+                System.err.println(e1);
             }
             return null;
         }
     }
 
-    private static void keyExchange(ObjectOutputStream out, ObjectInputStream in) throws Exception {
+    private void keyExchange(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         sharedKey = DHKeyExchange.serverSideSharedKeyCreation(out, in);
     }
 
-    private static void deriveAESKey() throws NoSuchAlgorithmException {
+    private void deriveAESKey() throws NoSuchAlgorithmException {
         aesKey = AES.deriveAESKey(sharedKey.toByteArray());
     }
 
-    private static String authentication(ObjectOutputStream out, ObjectInputStream in) throws Exception {
+    private String authentication(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         boolean result = false;
         while(!result) {
             String encryptedMessage = (String) in.readObject();
@@ -68,11 +73,14 @@ public class SecureAuthenticateClient {
                 if(ClientList.find(username) != null) { // Check if already logged in
                     logger.warn("User " + username + " already logged in");
                     result = false;
+                    out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
+                    out.flush();
                 } else {
                     if(!result) {
                         out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
                         out.flush();
                         logger.warn("Failed login attempt for user " + username);
+                        return null;
                     } else {
                         out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
                         out.flush();
@@ -91,6 +99,7 @@ public class SecureAuthenticateClient {
                     out.writeObject(AES.encrypt("/authenticationFailed", aesKey));
                     out.flush();
                     logger.warn("User " + username + " already exists, new user not registered");
+                    return null;
                 } else {
                     out.writeObject(AES.encrypt("/authenticationCorrect", aesKey));
                     out.flush();
@@ -102,7 +111,7 @@ public class SecureAuthenticateClient {
         return null;
     }
 
-    private static String authenticationS(ObjectOutputStream out, ObjectInputStream in) throws Exception {
+    private String authenticationS(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         boolean result;
         do{
             String message = """ 

@@ -1,5 +1,6 @@
 chat\Client\ServerCommandManager.class
 chat\Client\InputManager.class
+chat\Client\ChatGUI$1.class
 chat\Client\OnlineList.class
 chat\Server\SecureAuthenticateClient.class
 chat\Client\Client.class
@@ -13,5 +14,6 @@ chat\Server\Server.class
 chat\Server\ClientManager.class
 chat\Client\RSAUtils.class
 chat\Server\ClientList.class
+chat\Client\ChatGUI$2.class
 chat\Client\ChatGUI.class
 chat\Shared\ManageJson.class

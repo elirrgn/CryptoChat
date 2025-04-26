@@ -1,10 +1,9 @@
 package chat.Client;
 
-import java.security.PublicKey;
-import java.util.HashMap;
 import java.util.Set;
-
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -29,6 +28,7 @@ public class ChatGUI extends Application {
     private static VBox loginPane;
     private static BorderPane chatPane;
     private static Label loginStatusLabel;
+    private static ProgressIndicator loginLoadingIndicator; // New
 
     // Register View
     private static TextField regUsernameField;
@@ -38,6 +38,7 @@ public class ChatGUI extends Application {
     private static Button regBackButton;
     private static VBox registerPane;
     private static Label regStatusLabel;
+    private static ProgressIndicator registerLoadingIndicator; // New
 
     @Override
     public void start(Stage primaryStage) {
@@ -84,7 +85,11 @@ public class ChatGUI extends Application {
         loginStatusLabel = new Label();
         loginStatusLabel.setStyle("-fx-text-fill: red;");
 
-        VBox loginFields = new VBox(10, usernameField, passwordField, loginButton, registerButton, loginStatusLabel);
+        loginLoadingIndicator = new ProgressIndicator();
+        loginLoadingIndicator.setVisible(false);
+        loginLoadingIndicator.setPrefSize(30, 30);
+
+        VBox loginFields = new VBox(10, usernameField, passwordField, loginButton, registerButton, loginLoadingIndicator, loginStatusLabel);
         loginFields.setAlignment(Pos.CENTER);
         loginFields.setPadding(new Insets(20));
 
@@ -109,7 +114,11 @@ public class ChatGUI extends Application {
         regStatusLabel = new Label();
         regStatusLabel.setStyle("-fx-text-fill: red;");
 
-        VBox regFields = new VBox(10, regUsernameField, regPasswordField, regConfirmPasswordField, regSubmitButton, regBackButton, regStatusLabel);
+        registerLoadingIndicator = new ProgressIndicator();
+        registerLoadingIndicator.setVisible(false);
+        registerLoadingIndicator.setPrefSize(30, 30);
+
+        VBox regFields = new VBox(10, regUsernameField, regPasswordField, regConfirmPasswordField, regSubmitButton, regBackButton, registerLoadingIndicator, regStatusLabel);
         regFields.setAlignment(Pos.CENTER);
         regFields.setPadding(new Insets(20));
 
@@ -170,14 +179,32 @@ public class ChatGUI extends Application {
             return;
         }
 
-        boolean result = client.loginOrRegister("login", username, psw);
+        loginLoadingIndicator.setVisible(true);
+        loginStatusLabel.setText("");
 
-        if (result) {
-            loginStatusLabel.setText("");
-            stage.setScene(chatScene);
-        } else {
-            loginStatusLabel.setText("Login failed. Please try again.");
-        }
+        Task<Boolean> loginTask = new Task<>() {
+            @Override
+            protected Boolean call() {
+                return client.loginOrRegister("login", username, psw);
+            }
+        };
+
+        loginTask.setOnSucceeded(e -> {
+            loginLoadingIndicator.setVisible(false);
+            if (loginTask.getValue()) {
+                loginStatusLabel.setText("");
+                stage.setScene(chatScene);
+            } else {
+                loginStatusLabel.setText("Login failed. Please try again.");
+            }
+        });
+
+        loginTask.setOnFailed(e -> {
+            loginLoadingIndicator.setVisible(false);
+            loginStatusLabel.setText("An error occurred during login.");
+        });
+
+        new Thread(loginTask).start();
     }
 
     private static void handleRegister(Stage stage, Scene chatScene) {
@@ -195,15 +222,33 @@ public class ChatGUI extends Application {
             return;
         }
 
-        boolean result = client.loginOrRegister("register", username, password);
+        registerLoadingIndicator.setVisible(true);
+        regStatusLabel.setText("");
 
-        if (result) {
-            regStatusLabel.setText("");
-            loginStatusLabel.setText("");
-            stage.setScene(chatScene);
-        } else {
-            regStatusLabel.setText("Registration failed. Username may already exist.");
-        }
+        Task<Boolean> registerTask = new Task<>() {
+            @Override
+            protected Boolean call() {
+                return client.loginOrRegister("register", username, password);
+            }
+        };
+
+        registerTask.setOnSucceeded(e -> {
+            registerLoadingIndicator.setVisible(false);
+            if (registerTask.getValue()) {
+                regStatusLabel.setText("");
+                loginStatusLabel.setText("");
+                stage.setScene(chatPane.getScene());
+            } else {
+                regStatusLabel.setText("Registration failed. Username may already exist.");
+            }
+        });
+
+        registerTask.setOnFailed(e -> {
+            registerLoadingIndicator.setVisible(false);
+            regStatusLabel.setText("An error occurred during registration.");
+        });
+
+        new Thread(registerTask).start();
     }
 
     private static void sendMessage() {
@@ -216,26 +261,30 @@ public class ChatGUI extends Application {
     }
 
     public static void appendMessage(String msg) {
-        chatArea.appendText(msg+"\n");
+        chatArea.appendText(msg + "\n");
     }
 
-    public static void addOnlineUser(String username) {
+    public static void serverDisconnected() {
+        chatArea.appendText("Server offline, close the window");
+        messageField.clear();
+        messageField.setDisable(true);
+        sendButton.setDisable(true);
+    }
+
+    public synchronized static void addOnlineUser(String username) {
         if (!onlineUsers.getItems().contains(username)) {
             onlineUsers.getItems().add(username);
         }
     }
-    
-    public static void removeOnlineUser(String username) {
+
+    public synchronized static void removeOnlineUser(String username) {
         onlineUsers.getItems().remove(username);
     }
 
-    public static void loadOnlineClients(Set<String> clientList) {
-        // Using forEach to iterate over each clientName in clientList and add the user to the online users list
-        clientList.forEach(clientName -> {
-            addOnlineUser(clientName);
-            System.out.println(clientName);
-        });
+    public synchronized static void loadOnlineClients(Set<String> clientList) {
+        clientList.forEach(ChatGUI::addOnlineUser);
     }
+
     public static void main(String[] args) {
         launch(args);
     }

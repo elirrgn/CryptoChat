@@ -9,41 +9,63 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 import chat.Shared.ManageJson;
 
-
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
 
-	private static final int PORT=8080;
+    private static final int PORT = 8080;
 
     public static void main(String[] args) {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
-        
+
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            logger.info("Waiting for clients on port: "+PORT);
+            logger.info("Waiting for clients on port: " + PORT);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutting down server...");
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }));
 
             while (true) {
-                try {
-                    Socket clientSocket = serverSocket.accept();
-                    logger.info("Client connected");
-                    ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-                    ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                    String nome = SecureAuthenticateClient.SecureAuthentication(out, in);
-                    if(nome != null) {
-                        out.writeObject("/sendPublic");
-                        String publicKey = (String) in.readObject();
-                        // System.out.println(publicKey);
-                        ManageJson.aggiungiChiavePubblica(nome, publicKey);
-                        ClientList.sendAll(nome, "/connected;;"+nome+";;"+publicKey);
-                        ClientList.add(clientSocket, out, in, nome);
-                    } else {
-                        logger.info("Client not authenticated");
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error handling connection: " + e.getMessage());
-                }
+                Socket clientSocket = serverSocket.accept();
+                logger.info("Client connected");
+
+                // Start a new thread to authenticate the client
+                new Thread(() -> handleClientAuthentication(clientSocket)).start();
             }
-        } catch(Exception e) {
-            System.err.println("Error handling client: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error handling server socket: " + e.getMessage());
+        }
+    }
+
+    private static void handleClientAuthentication(Socket clientSocket) {
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+            SecureAuthenticateClient auth = new SecureAuthenticateClient();
+            String nome = auth.SecureAuthentication(out, in);
+            if (nome != null) {
+                out.writeObject("/sendPublic");
+                out.flush();
+                String publicKey = (String) in.readObject();
+                ManageJson.aggiungiChiavePubblica(nome, publicKey);
+                ClientList.sendAll(nome, "/connected;;" + nome + ";;" + publicKey);
+                ClientList.add(clientSocket, out, in, nome);
+                logger.info("Client " + nome + " authenticated and added to ClientList");
+            } else {
+                logger.info("Client failed to authenticate, closing connection");
+                clientSocket.close();
+            }
+        } catch (Exception e) {
+            logger.error("Error during client authentication: " + e.getMessage());
+            try {
+                clientSocket.close();
+            } catch (IOException ioException) {
+                return;
+            }
         }
     }
 }

@@ -20,7 +20,6 @@ public class ManageJson {
             }
 
             String content = new String(Files.readAllBytes(Paths.get(USERS_FILE)));
-            System.out.println(new JSONObject(content));
             return new JSONObject(content);
 
         } catch (Exception e) {
@@ -62,11 +61,9 @@ public class ManageJson {
     public synchronized static HashMap<String, PublicKey> getUtentiConPublicKey(String clientName) {
         HashMap<String, PublicKey> utentiConChiave = new HashMap<>();
         JSONObject utenti = caricaUtenti();
-        //System.out.println(utenti);
     
         for (String username : utenti.keySet()) {
             if (!username.equals(clientName)) { // Exclude the requesting client
-                System.out.println(username);
                 JSONObject userInfo = utenti.optJSONObject(username); // Get user info
                 if (userInfo != null && userInfo.has("publicKey")) {
                     // Check if the user has a publicKey
