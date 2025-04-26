@@ -39,11 +39,12 @@ It supports:
    ```
 
 4. **Run the Client**
+    **Note:** This project assumes you already have a **CryptoChat Server** running separately. The client will attempt to connect to it on startup.
+
    ```bash
    mvn javafx:run
    ```
 
-**Note:** This project assumes you already have a **CryptoChat Server** running separately. The client will attempt to connect to it on startup.
 
 ## 🖥️ Usage Guide
 After launching the client, you will be prompted to **Login** or **Register**.
@@ -80,12 +81,6 @@ cryptochat/
 * Java 17
 * JavaFX
 * Maven
-* AES/RSA Encryption (custom or BouncyCastle)
+* AES/RSA Encryption (custom and BouncyCastle)
 * TCP Sockets
 * Log4j2 (for logging)
-
-## 📜 License
-This project is licensed under the MIT License.
-
-## ✨ Acknowledgments
-Thanks to the Open Source community for JavaFX, BouncyCastle, and many other libraries that made secure chat possible! 💖
