@@ -39,7 +39,8 @@ It supports:
    ```
 
 4. **Run the Client**
-    **Note:** This project assumes you already have a **CryptoChat Server** running separately. The client will attempt to connect to it on startup.
+
+*Note:* This project assumes you already have a **CryptoChat Server** running separately. The client will attempt to connect to it on startup.
 
    ```bash
    mvn javafx:run
