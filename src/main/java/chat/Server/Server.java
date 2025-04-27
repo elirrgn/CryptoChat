@@ -9,6 +9,10 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 import chat.Shared.ManageJson;
 
+
+/**
+ * Main Server class, client connection management
+ */
 public class Server {
     private static final Logger logger = LogManager.getLogger(Server.class);
 
@@ -20,8 +24,10 @@ public class Server {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             logger.info("Waiting for clients on port: " + PORT);
 
+            // runs when I do ctrl+C on the console, closes correctly all the Streams
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 logger.info("Server shutting down...");
+                ManageJson.deleteOnlinePublicKeys();
                 try {
                     serverSocket.close();
                 } catch (IOException e) {
@@ -41,6 +47,11 @@ public class Server {
         }
     }
 
+    /**
+     * Manages authentication with client, adds public key to the JSON file and communicate to other clients
+     * 
+     * @param clientSocket the socket of the connected client
+     */
     private static void handleClientAuthentication(Socket clientSocket) {
         try {
             ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());

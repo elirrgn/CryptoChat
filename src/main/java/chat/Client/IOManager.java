@@ -17,6 +17,9 @@ import org.apache.logging.log4j.core.config.Configurator;
 import chat.Shared.AES;
 import chat.Shared.PacketManager;
 
+/**
+ * Manages IO streams of the client
+ */
 public class IOManager {
     private static final Logger logger = LogManager.getLogger(IOManager.class);
     static {
@@ -29,6 +32,16 @@ public class IOManager {
     private InputManager inputManager;
     private KeyPair keys;
 
+    /**
+     * Constructor of the class.
+     * 
+     * Saves client's data and streams, creates the RSA KeyPair and populate the OnlineList from the JSON. Adds the ioManager to the ServerCommandManager.
+     * 
+     * @param clientSocket client's socket
+     * @param out client's ObjectOutputStrem
+     * @param in client's ObjectInputStrem
+     * @param username client's username
+     */
     public IOManager(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in, String username) {
         try {
             this.username = username;
@@ -37,7 +50,7 @@ public class IOManager {
             OnlineList.loadFromJSON(username);
             ServerCommandManager.addIOManager(this);
             
-            this.outputManager = new OutputManager(out, this);
+            this.outputManager = new OutputManager(out);
             this.inputManager = new InputManager(in, this);
 
             logger.info("IOManager initialized for user: {}", username);
@@ -47,14 +60,31 @@ public class IOManager {
         }
     }
 
+
+    /**
+     * Getter for the RSA public key
+     * 
+     * @return the RSA public key
+     */
     public PublicKey getPublicKey() {
         return keys.getPublic();
     }
 
+    /**
+     * Getter for the RSA private key
+     * 
+     * @return the RSA private key
+     */
     public PrivateKey getPrivateKey() {
         return keys.getPrivate();
     }
 
+    /**
+     * Manages messages, performs Packet creation for messages to other clients.
+     * 
+     * @param msg the message
+     * @return null if message sent correctly, error message for the GUI otherwise
+     */
     public String sendMsg(String msg) {
         if(!msg.startsWith("/")) {
             try {
@@ -84,6 +114,7 @@ public class IOManager {
                     String encryptedMsg = AES.encrypt(msgString, aesKey);
 
                     if(OnlineList.getClientKey(dest) != null) {
+                        // Encryption with client public key and sign with self private key
                         String firstEncryptedAesKey = RSAUtils.encryptWithPublicKey(stringAesKey, OnlineList.getClientKey(dest));
 
                         String secondEncryptedAesKey = RSAUtils.encryptWithPrivateKey(firstEncryptedAesKey, this.getPrivateKey());
@@ -110,12 +141,13 @@ public class IOManager {
         return "Invalid command!";
     }
 
+    /**
+     * Sends message directly to server without checking for format.
+     * 
+     * @param msg message to send
+     */
     public void sendToServer(String msg) {
         logger.info("Sending message to server: {}", msg);
         outputManager.sendMsg(msg);
-    }
-
-    public String getUsername() {
-        return this.username;
     }
 }

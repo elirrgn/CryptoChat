@@ -12,6 +12,9 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 import chat.Shared.PacketManager;
 
+/**
+ * Client that manages a client input and output stream
+ */
 public class ClientManager implements Runnable {
     private static final Logger logger = LogManager.getLogger(ClientManager.class);
     static {
@@ -22,7 +25,15 @@ public class ClientManager implements Runnable {
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-
+    /**
+     * Constructor of the class
+     * 
+     * @param name the client's username
+     * @param socket the client's socket
+     * @param out client's ObjectOutputStream
+     * @param in client's ObjectInputStream
+     * @throws IOException if an error occurs during communication
+     */
     public ClientManager(String name, Socket socket, ObjectOutputStream out, ObjectInputStream in) throws IOException {
         this.name = name;
         this.in = in;
@@ -44,10 +55,20 @@ Commands:
         new Thread(this).start();
     }
 
+    /**
+     * Sends a message to the client
+     * 
+     * @param msg message to send
+     * @throws IOException if an error occurs during communication
+     */
     public void sendMsg(String msg) throws IOException {
         out.writeObject(msg);
     }
 
+    /**
+     * Listens for incoming messages and handles commands or message forwarding.
+     * Manages client disconnection on errors.
+     */
     @Override
     public void run() {
         while(true) {
@@ -93,5 +114,6 @@ Commands:
             }
         }
     }
+
     
 }

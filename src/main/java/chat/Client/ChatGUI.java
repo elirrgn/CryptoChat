@@ -17,6 +17,11 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+/**
+ * Handles the graphical user interface (GUI) for the CryptoChat client.
+ * Provides login, registration, and chat functionalities, including sending messages and managing online users.
+ * It interacts with the server for authentication and message handling.
+ */
 public class ChatGUI extends Application {
 
     private static Client client = new Client();
@@ -46,6 +51,14 @@ public class ChatGUI extends Application {
     private static Label regStatusLabel;
     private static ProgressIndicator registerLoadingIndicator;
 
+    /**
+     * Initializes and starts the CryptoChat client GUI.
+     * Sets up the various UI elements, including the login screen, registration screen, and chat interface.
+     * Handles user interactions and transitions between the login, registration, and chat scenes.
+     * Initializes the connection with the server and sets up event handlers for buttons and text fields.
+     *
+     * @param primaryStage The primary stage for the JavaFX application.
+     */
     @Override
     public void start(Stage primaryStage) {
         ChatGUI.primaryStage = primaryStage;
@@ -72,6 +85,7 @@ public class ChatGUI extends Application {
         onlineUsers = new ListView<>();
         onlineUsers.setPrefWidth(150);
 
+        // On double-click set up DM message to selected user
         onlineUsers.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) { // double-click
                 String selectedUser = onlineUsers.getSelectionModel().getSelectedItem();
@@ -158,35 +172,35 @@ public class ChatGUI extends Application {
         Scene registerScene = new Scene(registerPane, 600, 400);
 
         // Event Handling
-        loginButton.setOnAction(e -> handleLogin(primaryStage, chatScene));
+        loginButton.setOnAction(e -> handleLogin(primaryStage, chatScene)); //Login handling
         passwordField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) handleLogin(primaryStage, chatScene);
+            if (e.getCode() == KeyCode.ENTER) handleLogin(primaryStage, chatScene); // Submit on Enter key pressed
         });
         usernameField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) handleLogin(primaryStage, chatScene);
+            if (e.getCode() == KeyCode.ENTER) handleLogin(primaryStage, chatScene); // Submit on Enter key pressed
         });
 
-        registerButton.setOnAction(e -> primaryStage.setScene(registerScene));
+        registerButton.setOnAction(e -> primaryStage.setScene(registerScene)); // Redirect to register screen
 
-        regBackButton.setOnAction(e -> {
+        regBackButton.setOnAction(e -> { // Go back to login screen
             regStatusLabel.setText("");
             primaryStage.setScene(loginScene);
         });
 
-        regSubmitButton.setOnAction(e -> handleRegister(primaryStage, chatScene));
+        regSubmitButton.setOnAction(e -> handleRegister(primaryStage, chatScene)); //Registration handling
         regConfirmPasswordField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) handleRegister(primaryStage, chatScene);
+            if (e.getCode() == KeyCode.ENTER) handleRegister(primaryStage, chatScene); // Submit on Enter key pressed
         });
         regPasswordField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) handleRegister(primaryStage, chatScene);
+            if (e.getCode() == KeyCode.ENTER) handleRegister(primaryStage, chatScene); // Submit on Enter key pressed
         });
         regUsernameField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) handleRegister(primaryStage, chatScene);
+            if (e.getCode() == KeyCode.ENTER) handleRegister(primaryStage, chatScene); // Submit on Enter key pressed
         });
 
         sendButton.setOnAction(e -> sendMessage());
         messageField.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) sendMessage();
+            if (e.getCode() == KeyCode.ENTER) sendMessage(); // Send message on Enter key pressed
         });
 
         primaryStage.setOnCloseRequest((WindowEvent event) -> {
@@ -212,6 +226,15 @@ public class ChatGUI extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Handles the login process.
+     * 
+     * This method validates the user's credentials, initiates a login task in the background, and updates the UI 
+     * based on the result (success or failure).
+     *
+     * @param stage The current stage of the application.
+     * @param chatScene The scene to switch to upon successful login.
+     */
     private static void handleLogin(Stage stage, Scene chatScene) {
         loginButton.setDisable(true);
         String username = usernameField.getText().trim();
@@ -253,6 +276,15 @@ public class ChatGUI extends Application {
         new Thread(loginTask).start();
     }
 
+    /**
+     * Handles the registration process.
+     * 
+     * This method validates the registration inputs, performs the registration in the background, and updates the UI 
+     * based on the result (success or failure).
+     *
+     * @param stage The current stage of the application.
+     * @param chatScene The scene to switch to upon successful registration.
+     */
     private static void handleRegister(Stage stage, Scene chatScene) {
         regSubmitButton.setDisable(true);
         String username = regUsernameField.getText().trim();
@@ -299,6 +331,12 @@ public class ChatGUI extends Application {
         new Thread(registerTask).start();
     }
 
+    /**
+     * Sends a message typed by the user.
+     * 
+     * The method retrieves the message from the input field and sends it to the server. It also updates the chat with 
+     * the message, indicating whether it was successfully sent or if there was an error.
+     */
     private static void sendMessage() {
         String msg = messageField.getText().trim();
         if (!msg.isEmpty()) {
@@ -318,37 +356,66 @@ public class ChatGUI extends Application {
         }
     }
 
+    /**
+     * Appends a message to the chat window with a default color (black).
+     * 
+     * This method adds the given message to the chat area with a timestamp, formatted with the current time.
+     *
+     * @param msg The message to display in the chat.
+     */
     public static void appendMessage(String msg) {
         appendMessage(msg, "black");
     }
 
+    /**
+     * Appends a message to the chat window with a custom color.
+     * 
+     * This method adds the given message to the chat area with a timestamp, formatted with the current time. The 
+     * message is displayed in the specified color.
+     *
+     * @param msg The message to display in the chat.
+     * @param color The color in which the message will be displayed (as a string or hexadecimal string).
+     */
     public static void appendMessage(String msg, String color) {
-    Platform.runLater(() -> {
-        // Get current time in the format hh:mm:ss
-        String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
+        Platform.runLater(() -> {
+            // Get current time in the format hh:mm:ss
+            String time = new SimpleDateFormat("HH:mm:ss").format(new Date());
 
-        // Construct the formatted message with time, sender, and message
-        String formattedMsg = String.format("[%s] %s", time, msg);
+            // Construct the formatted message with time, sender, and message
+            String formattedMsg = String.format("[%s] %s", time, msg);
 
-        Text text = new Text(formattedMsg + "\n");
-        text.setStyle("-fx-fill: " + color + ";");
-        chatFlow.getChildren().add(text);
-    });
-}
+            Text text = new Text(formattedMsg + "\n");
+            text.setStyle("-fx-fill: " + color + ";");
+            chatFlow.getChildren().add(text);
+        });
+    }
+
+    /**
+     * Handles the server disconnection event.
+     * 
+     * This method displays a message indicating the server is offline and disables chat functionality.
+     */
     public static void serverDisconnected() {
         appendMessage("Server offline, close the window", "red");
         messageField.clear();
         messageField.setDisable(true);
         sendButton.setDisable(true);
     }
-    
+
     public static void clientProcessKilled() {
         appendMessage("Client Process Killed!", "red");
         messageField.clear();
         messageField.setDisable(true);
         sendButton.setDisable(true);
     }
-
+    
+    /**
+     * Adds an online user to the online users list.
+     * 
+     * This method adds the specified username to the list of online users in the GUI, ensuring thread-safety.
+     *
+     * @param username The username of the online user to add.
+     */
     public synchronized static void addOnlineUser(String username) {
         Platform.runLater(() -> {
             if (!onlineUsers.getItems().contains(username)) {
@@ -357,16 +424,37 @@ public class ChatGUI extends Application {
         });
     }
 
+    /**
+     * Removes an online user from the online users list.
+     * 
+     * This method removes the specified username from the list of online users in the GUI, ensuring thread-safety.
+     *
+     * @param username The username of the online user to remove.
+     */
     public synchronized static void removeOnlineUser(String username) {
         Platform.runLater(() -> { // If not Exception
             onlineUsers.getItems().remove(username);
         });
     }
 
+    /**
+     * Loads a set of online users into the online users list.
+     * 
+     * This method populates the online users list with a set of usernames provided by the server.
+     *
+     * @param clientList A set containing the usernames of all online clients.
+     */
     public synchronized static void loadOnlineClients(Set<String> clientList) {
         clientList.forEach(ChatGUI::addOnlineUser);
     }
 
+    /**
+     * Updates the title of the primary stage.
+     * 
+     * This method updates the window title to the given string in a thread-safe manner.
+     *
+     * @param newTitle The new title for the primary stage.
+     */
     public static void setPrimaryStageTitle(String newTitle) {
         Platform.runLater(() -> {
             primaryStage.setTitle(newTitle);

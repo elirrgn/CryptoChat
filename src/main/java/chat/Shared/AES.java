@@ -15,6 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Base64;
 
+/**
+ * Utility class for AES-256 encryption, decryption, and key management.
+ */
 public class AES {
     private static final Logger logger = LogManager.getLogger(AES.class);
 
@@ -27,7 +30,12 @@ public class AES {
     private static final int GCM_IV_LENGTH = 12;  // Recommended IV length for AES-GCM
     private static final int GCM_TAG_LENGTH = 128; // Authentication tag length
 
-    // Generate AES-256 Key
+    /**
+     * Generates a new AES-256 secret key.
+     *
+     * @return the generated AES key
+     * @throws NoSuchAlgorithmException if the AES algorithm is not available
+     */
     public static SecretKey generateAESKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
         keyGen.init(AES_KEY_SIZE, new SecureRandom());
@@ -36,7 +44,13 @@ public class AES {
         return aesKey;
     }
 
-    // Convert shared secret into AES Key
+    /**
+     * Derives an AES key from a shared secret.
+     *
+     * @param sharedSecret the shared secret bytes
+     * @return the derived AES key
+     * @throws NoSuchAlgorithmException if the SHA-256 algorithm is not available
+     */    
     public static SecretKey deriveAESKey(byte[] sharedSecret) throws NoSuchAlgorithmException {
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         byte[] key = sha.digest(sharedSecret);
@@ -45,7 +59,14 @@ public class AES {
         return derivedKey;
     }
 
-    // Encrypt using AES-GCM
+    /**
+     * Encrypts a plaintext string using AES-GCM.
+     *
+     * @param plaintext the data to encrypt
+     * @param key the AES key used for encryption
+     * @return the encrypted data encoded as a Base64 string
+     * @throws Exception if an encryption error occurs
+     */
     public static String encrypt(String plaintext, SecretKey key) throws Exception {
         logger.debug("Encrypting data using AES-GCM.");
 
@@ -68,7 +89,14 @@ public class AES {
         return Base64.getEncoder().encodeToString(combined);
     }
 
-    // Decrypt using AES-GCM
+    /**
+     * Decrypts an AES-GCM encrypted string.
+     *
+     * @param ciphertext the Base64 encoded encrypted data
+     * @param key the AES key used for decryption
+     * @return the decrypted plaintext
+     * @throws Exception if a decryption error occurs
+     */
     public static String decrypt(String ciphertext, SecretKey key) throws Exception {
         logger.debug("Decrypting data using AES-GCM.");
 
@@ -91,12 +119,22 @@ public class AES {
         return new String(decryptedData, StandardCharsets.UTF_8);
     }
 
-    // Convert SecretKey to Base64 String
+    /**
+     * Converts a secret key to a Base64 encoded string.
+     *
+     * @param secretKey the secret key to convert
+     * @return the Base64 encoded string
+     */
     public static String secretKeyToString(SecretKey secretKey) {
         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 
-    // Convert Base64 String to SecretKey
+    /**
+     * Converts a Base64 encoded string back to a secret key.
+     *
+     * @param keyString the Base64 encoded key string
+     * @return the reconstructed secret key
+     */
     public static SecretKey stringToSecretKey(String keyString) {
         byte[] decodedKey = Base64.getDecoder().decode(keyString);
         return new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");

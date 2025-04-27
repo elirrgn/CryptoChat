@@ -2,19 +2,27 @@ package chat.Client;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Scanner;
 
+/**
+ * Class to manage client's output, sends messages
+ */
 public class OutputManager {
     private ObjectOutputStream out;
-    private Scanner input;
-    private IOManager ioManager;
 
-    public OutputManager(ObjectOutputStream out, IOManager ioManager) throws IOException {
+    /**
+     * Constructor of the class
+     * 
+     * @param out client's ObjectOutputStream
+     */
+    public OutputManager(ObjectOutputStream out) {
         this.out = out;
-        this.ioManager = ioManager;
-        this.input = new Scanner(System.in);
     }
     
+    /**
+     * Sends messages with the ObjectOutputStream
+     * 
+     * @param msg message to send
+     */
     public void sendMsg(String msg) {
         try {
             out.writeObject(msg);

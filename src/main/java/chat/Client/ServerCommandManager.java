@@ -5,6 +5,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;
 
+/**
+ * Utility class that manages Server Commands
+ */
 public class ServerCommandManager {
     private static final Logger logger = LogManager.getLogger(ServerCommandManager.class);
     static {
@@ -13,10 +16,19 @@ public class ServerCommandManager {
 
     private static IOManager ioManager;
     
+    /**
+     * Adds the ioManager to the class
+     * @param io client's IOManager
+     */
     public static void addIOManager(IOManager io) {
         ioManager = io;
     }
 
+    /**
+     * Manages Server Commands: public key request and connections/disconnections
+     * 
+     * @param msg the server message
+     */
     public static void manageCommand(String msg) {
         String[] splitMsg = msg.split(";;");
 

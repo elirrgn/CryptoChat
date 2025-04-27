@@ -15,19 +15,29 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * Utility class providing RSA encryption and decryption methods.
+ * This class uses Bouncy Castle as the cryptographic provider.
+ */
 public class RSAUtils {
 
     private static final Logger logger = LogManager.getLogger(RSAUtils.class);
+
     static {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
         Security.addProvider(new BouncyCastleProvider());
     }
 
     private static final int RSA_KEY_SIZE = 2048;
-    private static final int RSA_MAX_ENCRYPT_BLOCK = 245; // 2048-bit key with PKCS1Padding = 245 bytes max plaintext
-    private static final int RSA_MAX_DECRYPT_BLOCK = 256; // 2048-bit key = 256 bytes ciphertext block size
+    private static final int RSA_MAX_ENCRYPT_BLOCK = 245;
+    private static final int RSA_MAX_DECRYPT_BLOCK = 256;
 
-    // Generate RSA key pair
+    /**
+     * Generates a new RSA key pair.
+     * 
+     * @return A KeyPair containing a public and private key.
+     * @throws Exception If an error occurs during key generation.
+     */
     public static KeyPair generateKeyPair() throws Exception {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
         keyGen.initialize(RSA_KEY_SIZE);
@@ -36,7 +46,14 @@ public class RSAUtils {
         return keyPair;
     }
 
-    // Encrypt with the foreign public key
+    /**
+     * Encrypts the provided plaintext with the given public key.
+     * 
+     * @param plainText The data to encrypt.
+     * @param publicKey The public key used for encryption.
+     * @return The encrypted data as a Base64 encoded string.
+     * @throws Exception If an error occurs during encryption.
+     */
     public static String encryptWithPublicKey(String plainText, PublicKey publicKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -57,7 +74,14 @@ public class RSAUtils {
         return Base64.getEncoder().encodeToString(finalEncrypted);
     }
 
-    // Encrypt with your private key (signing the data)
+    /**
+     * Encrypts the provided data with the given private key (signing).
+     * 
+     * @param data The data to sign.
+     * @param privateKey The private key used for encryption.
+     * @return The signed data as a Base64 encoded string.
+     * @throws Exception If an error occurs during encryption.
+     */
     public static String encryptWithPrivateKey(String data, PrivateKey privateKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
@@ -78,7 +102,14 @@ public class RSAUtils {
         return Base64.getEncoder().encodeToString(finalEncrypted);
     }
 
-    // Decrypt with your public key (first step of decryption)
+    /**
+     * Decrypts the provided Base64 encoded data using the given public key.
+     * 
+     * @param encryptedBase64 The encrypted data as a Base64 encoded string.
+     * @param publicKey The public key used for decryption.
+     * @return The decrypted plaintext.
+     * @throws Exception If an error occurs during decryption.
+     */
     public static String decryptWithPublicKey(String encryptedBase64, PublicKey publicKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
         cipher.init(Cipher.DECRYPT_MODE, publicKey);
@@ -99,7 +130,14 @@ public class RSAUtils {
         return new String(finalDecrypted, StandardCharsets.UTF_8);
     }
 
-    // Decrypt with the foreign private key (second step of decryption)
+    /**
+     * Decrypts the provided Base64 encoded data using the given private key.
+     * 
+     * @param encryptedBase64 The encrypted data as a Base64 encoded string.
+     * @param privateKey The private key used for decryption.
+     * @return The decrypted plaintext.
+     * @throws Exception If an error occurs during decryption.
+     */
     public static String decryptWithPrivateKey(String encryptedBase64, PrivateKey privateKey) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "BC");
         cipher.init(Cipher.DECRYPT_MODE, privateKey);
@@ -120,12 +158,23 @@ public class RSAUtils {
         return new String(finalDecrypted, StandardCharsets.UTF_8);
     }
 
-    // Convert public key to a string
+    /**
+     * Converts a public key to a Base64 encoded string.
+     * 
+     * @param publicKey The public key to convert.
+     * @return The public key as a Base64 encoded string.
+     */
     public static String publicKeyToString(PublicKey publicKey) {
         return Base64.getEncoder().encodeToString(publicKey.getEncoded());
     }
 
-    // Convert string to public key
+    /**
+     * Converts a Base64 encoded string to a public key.
+     * 
+     * @param keyStr The Base64 encoded string representing the public key.
+     * @return The corresponding public key.
+     * @throws Exception If an error occurs during the conversion.
+     */
     public static PublicKey stringToPublicKey(String keyStr) throws Exception {
         byte[] keyBytes = Base64.getDecoder().decode(keyStr);
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
@@ -133,12 +182,23 @@ public class RSAUtils {
         return keyFactory.generatePublic(keySpec);
     }
 
-    // Convert private key to string
+    /**
+     * Converts a private key to a Base64 encoded string.
+     * 
+     * @param privateKey The private key to convert.
+     * @return The private key as a Base64 encoded string.
+     */
     public static String privateKeyToString(PrivateKey privateKey) {
         return Base64.getEncoder().encodeToString(privateKey.getEncoded());
     }
 
-    // Convert string to private key
+    /**
+     * Converts a Base64 encoded string to a private key.
+     * 
+     * @param keyStr The Base64 encoded string representing the private key.
+     * @return The corresponding private key.
+     * @throws Exception If an error occurs during the conversion.
+     */
     public static PrivateKey stringToPrivateKey(String keyStr) throws Exception {
         byte[] keyBytes = Base64.getDecoder().decode(keyStr);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
@@ -146,7 +206,12 @@ public class RSAUtils {
         return keyFactory.generatePrivate(keySpec);
     }
 
-    // Helper to join encrypted/decrypted chunks
+    /**
+     * Joins a list of byte arrays into a single byte array.
+     * 
+     * @param chunks The list of byte arrays to join.
+     * @return The combined byte array.
+     */
     private static byte[] joinChunks(List<byte[]> chunks) {
         int totalLength = 0;
         for (byte[] chunk : chunks) {

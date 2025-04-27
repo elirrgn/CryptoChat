@@ -17,23 +17,32 @@ import chat.Shared.AES;
 import chat.Shared.DHKeyExchange;
 import chat.Shared.ManageJson;
 
+
+/**
+ * Class that manages the client authentication from server side
+ */
 public class SecureAuthenticateClient {
     private static final Logger logger = LogManager.getLogger(SecureAuthenticateClient.class);
 
     private static final Object syncLock = new Object(); // Lock object for synchronization
-
-    private BigInteger sharedKey;
     private SecretKey aesKey;
 
     static {
         Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
     }
 
+    /**
+     * Does key exchange with Dieffie Hellman and authenticates client
+     * 
+     * @param out the client ObjectOuputStream
+     * @param in the client ObjectInputStream
+     * @return the username of the authenticated client or null
+     */
     public String SecureAuthentication(ObjectOutputStream out, ObjectInputStream in) {
         try {
-            synchronized (syncLock) {
-                keyExchange(out, in); // Synchronize key exchange
-                deriveAESKey(); // Synchronize AES key derivation
+            synchronized (syncLock) { // Synchronize key exchange
+                BigInteger sharedKey = DHKeyExchange.serverSideSharedKeyCreation(out, in); 
+                aesKey = AES.deriveAESKey(sharedKey.toByteArray());
             }
             return authentication(out, in);
         } catch(Exception e) {
@@ -43,20 +52,20 @@ public class SecureAuthenticateClient {
                 out.close();
                 in.close();
             } catch (IOException e1) {
-                
+                logger.error("Streams not closed correctly", e1);
             }
             return null;
         }
     }
 
-    private void keyExchange(ObjectOutputStream out, ObjectInputStream in) throws Exception {
-        sharedKey = DHKeyExchange.serverSideSharedKeyCreation(out, in);
-    }
-
-    private void deriveAESKey() throws NoSuchAlgorithmException {
-        aesKey = AES.deriveAESKey(sharedKey.toByteArray());
-    }
-
+    /**
+     * Handles the authentication process by receiving and processing login or registration commands.
+     *
+     * @param out the client ObjectOutputStream
+     * @param in the client ObjectInputStream
+     * @return the authenticated username if successful, or null if authentication fails
+     * @throws Exception if an error occurs during communication or encryption/decryption
+     */
     private String authentication(ObjectOutputStream out, ObjectInputStream in) throws Exception {
         boolean result = false;
         while(!result) {
@@ -108,21 +117,28 @@ public class SecureAuthenticateClient {
         return null;
     }
 
+    /**
+     * Manages user registration
+     * 
+     * @param username client's username
+     * @param hashedPassword password hashed to save
+     * @return true if correctly registered or false if username already exists or error occurred
+     */
     private static boolean register(String username, String hashedPassword) {
         try {
-            JSONObject utenti = ManageJson.loadUsersFromFile();
+            JSONObject users = ManageJson.loadUsersFromFile();
     
-            if (utenti.has(username)) {
-                return false; // utente già registrato
+            if (users.has(username)) {
+                return false; // username already registered
             }
             
-            // Crea oggetto utente
+            // Creates an user JSONObject
             JSONObject userObj = new JSONObject();
             userObj.put("hash", hashedPassword);
     
-            // Salva nel file
-            utenti.put(username, userObj);
-            ManageJson.saveUsersToFile(utenti);
+            // Saves new users list in the file
+            users.put(username, userObj);
+            ManageJson.saveUsersToFile(users);
             return true;
     
         } catch (Exception e) {
@@ -131,15 +147,22 @@ public class SecureAuthenticateClient {
         }
     }
 
+    /**
+     * Manages user login
+     * 
+     * @param username client's username
+     * @param password password to check
+     * @return true if correctly logged in or false if username not found, if wrong password or error occurred
+     */
     private static boolean login(String username, String password) {
         try {
-            JSONObject utenti = ManageJson.loadUsersFromFile();
+            JSONObject users = ManageJson.loadUsersFromFile();
     
-            if (!utenti.has(username)) {
-                return false; // utente non esiste
+            if (!users.has(username)) {
+                return false; // username not found
             }
     
-            JSONObject userObj = utenti.getJSONObject(username);
+            JSONObject userObj = users.getJSONObject(username);
             String hashSalvato = userObj.getString("hash");
     
             return BCrypt.checkpw(password, hashSalvato);

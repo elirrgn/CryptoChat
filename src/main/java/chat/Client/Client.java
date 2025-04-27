@@ -16,6 +16,9 @@ import org.apache.logging.log4j.core.config.Configurator;
 import chat.Shared.AES;
 import chat.Shared.DHKeyExchange;
 
+/**
+ * Main Client class for connecting, disconnecting and sending message to the server
+ */
 public class Client {
     private static final Logger logger = LogManager.getLogger(Client.class);
     static {
@@ -31,6 +34,9 @@ public class Client {
     private String username;
     private IOManager ioManager;
     
+    /**
+     * Method that connects to the Server and performs Dieffie Hellman key exchange
+     */
     public void connectWithServer() {
 		try {
             socket = new Socket(ADDRESS, PORT);
@@ -49,6 +55,14 @@ public class Client {
 		}
     }
 
+    /**
+     * Method to do the encrypted authentication with the server, sends commands to the server and authenticates.
+     * 
+     * @param action action to take: "login" or "register"
+     * @param username the username for the authentication
+     * @param password the password for the authentication
+     * @return true if authenticated correctly, false if authentication failed or error
+     */
     public boolean loginOrRegister(String action, String username, String password) {
         try {
             logger.info("Attempting {} with username: {}", action, username);
@@ -77,6 +91,9 @@ public class Client {
         return false;
     }
 
+    /**
+     * Method to disconnect from the server.
+     */
     public void disconnect() {
         try {
             logger.info("Disconnecting from server...");
@@ -87,6 +104,12 @@ public class Client {
         }
     }
 
+    /**
+     * Send message to ioManager that will check the format
+     * 
+     * @param msg the message passed
+     * @return ioManager.sendMsg return
+     */
     public String sendMsg(String msg) {
         return ioManager.sendMsg(msg);
     }
