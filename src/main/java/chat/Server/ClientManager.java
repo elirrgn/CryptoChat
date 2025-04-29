@@ -18,7 +18,7 @@ import chat.Shared.PacketManager;
 public class ClientManager implements Runnable {
     private static final Logger logger = LogManager.getLogger(ClientManager.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private String name;
@@ -39,7 +39,7 @@ public class ClientManager implements Runnable {
         this.in = in;
         this.out = out;
 
-        logger.info("Started ClientManager thread for user: " + name);
+        logger.debug("Started ClientManager thread for user: " + name);
 
         out.writeObject("""
 Welcome to CryptoChat! Here’s what you can do:
@@ -92,10 +92,10 @@ Commands:
                     String dest = PacketManager.getPacketDest(msg);
                     if(!dest.equals("all")) {
                         ClientList.sendDM(dest, msg);
-                        logger.info(PacketManager.getPacketSrc(msg)+" message to " + PacketManager.getPacketDest(msg));
+                        logger.info(src+" message to " + dest);
                     } else {
                         ClientList.sendAll(src, msg);
-                        logger.info(PacketManager.getPacketSrc(msg)+" message to all");
+                        logger.info(src+" message to all");
                     }
                 } else {
                     logger.warn("Invalid packet format received from " + name + ": " + msg);

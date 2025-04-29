@@ -22,7 +22,7 @@ import chat.Client.RSAUtils;
 public class ManageJson {
     private static final Logger logger = LogManager.getLogger(ManageJson.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private static final String USERS_FILE = "users.json";
@@ -124,7 +124,7 @@ public class ManageJson {
             }
         }
         
-        logger.info("Users with public keys retrieved.");
+        logger.debug("Users with public keys retrieved.");
         return usersWithKey;
     }
     
@@ -143,13 +143,13 @@ public class ManageJson {
                 // Set the publicKey to null if it's present
                 userObj.remove("publicKey");
                 users.put(username, userObj); // Update the user object
-                logger.info("Public key set to null for user: " + username);
+                logger.debug("Public key set to null for user: " + username);
             }
         }
 
         // Save the updated user data back to the file
         saveUsersToFile(users);
-        logger.info("Public keys set to null for all users with a public key.");
+        logger.debug("Public keys set to null for all users with a public key.");
     }
 
 

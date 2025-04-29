@@ -17,7 +17,7 @@ public class OnlineList {
     private static HashMap<String, PublicKey> clientKeys = new HashMap<String, PublicKey>(); // ClientName, Client public Key
     
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     /**
@@ -28,7 +28,7 @@ public class OnlineList {
     public static void loadFromJSON(String username) {
         clientKeys = ManageJson.getUsersWithPublicKey(username);
         ChatGUI.loadOnlineClients(clientKeys.keySet());
-        logger.info("Client Online List Added");
+        logger.debug("Client Online List Added");
     }
 
     /**
@@ -40,7 +40,7 @@ public class OnlineList {
     public static void addClient(String clientName, PublicKey publicKey) {
         clientKeys.put(clientName, publicKey);
         ChatGUI.addOnlineUser(clientName);
-        logger.info("Added client: "+clientName);;
+        logger.debug("Added client: "+clientName);;
     }
     
     /**
@@ -51,7 +51,7 @@ public class OnlineList {
     public static void removeClient(String clientName) {
         clientKeys.remove(clientName);
         ChatGUI.removeOnlineUser(clientName);
-        logger.info("Removed client: "+clientName);;
+        logger.debug("Removed client: "+clientName);;
     }
     
     /**

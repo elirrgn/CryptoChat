@@ -23,7 +23,7 @@ import chat.Shared.PacketManager;
 public class IOManager {
     private static final Logger logger = LogManager.getLogger(IOManager.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private Socket socket;
@@ -53,7 +53,7 @@ public class IOManager {
             this.outputManager = new OutputManager(out);
             this.inputManager = new InputManager(in, this);
 
-            logger.info("IOManager initialized for user: {}", username);
+            logger.debug("IOManager initialized for user: {}", username);
 
         } catch (Exception e) {
             logger.error("Error initializing IOManager for user {}: {}", username, e.getMessage());

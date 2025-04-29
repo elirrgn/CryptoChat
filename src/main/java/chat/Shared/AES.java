@@ -22,7 +22,7 @@ public class AES {
     private static final Logger logger = LogManager.getLogger(AES.class);
 
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -85,7 +85,7 @@ public class AES {
         System.arraycopy(iv, 0, combined, 0, iv.length);
         System.arraycopy(encryptedData, 0, combined, iv.length, encryptedData.length);
 
-        logger.info("Message encrypted");
+        logger.debug("Message encrypted");
         return Base64.getEncoder().encodeToString(combined);
     }
 
@@ -115,7 +115,7 @@ public class AES {
 
         byte[] decryptedData = cipher.doFinal(encryptedData);
         
-        logger.info("Message decrypted");
+        logger.debug("Message decrypted");
         return new String(decryptedData, StandardCharsets.UTF_8);
     }
 

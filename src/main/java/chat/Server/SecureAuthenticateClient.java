@@ -27,7 +27,7 @@ public class SecureAuthenticateClient {
     private SecretKey aesKey;
 
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     /**
@@ -47,7 +47,7 @@ public class SecureAuthenticateClient {
         } catch(Exception e) {
             logger.error("Error during key exchange or AES key derivation", e);
             try {
-                logger.info("Client failed to authenticate, closing connection");
+                logger.error("Client failed to authenticate, closing connection");
                 out.close();
                 in.close();
             } catch (IOException e1) {

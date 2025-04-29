@@ -22,7 +22,7 @@ public class ClientList {
     private static HashMap<String, ClientManager> managers = new HashMap<String,ClientManager>(); // name -> manager
     
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     /**

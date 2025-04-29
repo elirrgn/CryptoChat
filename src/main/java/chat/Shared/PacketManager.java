@@ -15,7 +15,7 @@ import org.json.JSONTokener;
 public class PacketManager {
     private static final Logger logger = LogManager.getLogger(PacketManager.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     /**
@@ -44,7 +44,7 @@ public class PacketManager {
             .endObject()
             .toString();
 
-        logger.debug("Message packet created: ", packet);
+        logger.debug("Message packet created");
         return packet;
     }
 
@@ -62,9 +62,9 @@ public class PacketManager {
             obj.get("dest");
             obj.get("msg");
             obj.get("key");
-            logger.info("Packet format is valid.");
+            logger.debug("Packet format is valid.");
         } catch(Exception e) {
-            logger.error("Invalid packet format: ", packet, e);
+            logger.error("Invalid packet format: ", packet);
             return false;
         }
         return true;

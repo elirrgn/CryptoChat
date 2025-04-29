@@ -17,7 +17,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 public class DHKeyExchange {
     private static final Logger logger = LogManager.getLogger(DHKeyExchange.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private static BigInteger p = new BigInteger("FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD1"
@@ -47,7 +47,7 @@ public class DHKeyExchange {
         
         BigInteger sharedKey = otherPublic.modPow(myPrivateKey, p);
     
-        logger.info("Client created shared key.");
+        logger.debug("Client created shared key.");
         return sharedKey;
     }
 
@@ -71,7 +71,7 @@ public class DHKeyExchange {
 
         BigInteger sharedKey = otherPublic.modPow(myPrivateKey, p);
     
-        logger.info("Server created shared key.");
+        logger.debug("Server created shared key.");
         return sharedKey;
     }
 }

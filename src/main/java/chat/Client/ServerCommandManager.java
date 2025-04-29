@@ -11,7 +11,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 public class ServerCommandManager {
     private static final Logger logger = LogManager.getLogger(ServerCommandManager.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private static IOManager ioManager;
@@ -39,7 +39,8 @@ public class ServerCommandManager {
                 break;
             case "/connected":
                 try {
-                    logger.info("Client {} connected, adding to OnlineList...", splitMsg[1]);
+                    logger.info("Client {} connected.", splitMsg[1]);
+                    logger.debug("Adding Client {} to OnlineList...", splitMsg[1]);
                     OnlineList.addClient(splitMsg[1], RSAUtils.stringToPublicKey(splitMsg[2]));
                 } catch (Exception e) {
                     logger.error("Error processing /connected command for client: " + splitMsg[1], e);
@@ -47,7 +48,8 @@ public class ServerCommandManager {
                 ChatGUI.appendMessage(splitMsg[1]+" joined the chat!", "#7F8C8D");
                 break;
             case "/disconnected":
-                logger.info("Client {} disconnected, removing from OnlineList...", splitMsg[1]);
+                logger.info("Client {} disconnected", splitMsg[1]);
+                logger.info("Removing client {} from OnlineList", splitMsg[1]);
                 OnlineList.removeClient(splitMsg[1]);
                 ChatGUI.appendMessage(splitMsg[1]+" left the chat!", "#7F8C8D");
                 break;

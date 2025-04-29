@@ -16,8 +16,9 @@ import chat.Shared.PacketManager;
  */
 public class InputManager implements Runnable {
     private static final Logger logger = LogManager.getLogger(InputManager.class);
+    
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private ObjectInputStream in;

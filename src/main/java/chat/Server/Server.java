@@ -19,7 +19,7 @@ public class Server {
     private static final int PORT = 8080;
 
     public static void main(String[] args) {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             logger.info("Waiting for clients on port: " + PORT);
@@ -65,9 +65,9 @@ public class Server {
                 ManageJson.addOrEditPublicKey(nome, publicKey);
                 ClientList.sendAll(nome, "/connected;;" + nome + ";;" + publicKey);
                 ClientList.add(clientSocket, out, in, nome);
-                logger.info("Client " + nome + " authenticated and added to ClientList");
+                logger.info("Client " + nome + " authenticated");
             } else {
-                logger.info("Client failed to authenticate, closing connection");
+                logger.error("Client failed to authenticate, closing connection");
                 clientSocket.close();
             }
         } catch (Exception e) {

@@ -24,7 +24,7 @@ public class RSAUtils {
     private static final Logger logger = LogManager.getLogger(RSAUtils.class);
 
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
         Security.addProvider(new BouncyCastleProvider());
     }
 
@@ -42,7 +42,7 @@ public class RSAUtils {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
         keyGen.initialize(RSA_KEY_SIZE);
         KeyPair keyPair = keyGen.generateKeyPair();
-        logger.info("RSA key pair generated successfully.");
+        logger.debug("RSA key pair generated successfully.");
         return keyPair;
     }
 
@@ -69,7 +69,7 @@ public class RSAUtils {
         }
 
         byte[] finalEncrypted = joinChunks(encryptedChunks);
-        logger.info("Data encrypted successfully.");
+        logger.debug("Data encrypted successfully.");
 
         return Base64.getEncoder().encodeToString(finalEncrypted);
     }
@@ -98,7 +98,7 @@ public class RSAUtils {
 
         byte[] finalEncrypted = joinChunks(encryptedChunks);
 
-        logger.info("Data encrypted successfully.");
+        logger.debug("Data encrypted successfully.");
         return Base64.getEncoder().encodeToString(finalEncrypted);
     }
 
@@ -126,7 +126,7 @@ public class RSAUtils {
 
         byte[] finalDecrypted = joinChunks(decryptedChunks);
 
-        logger.info("Data decrypted successfully.");
+        logger.debug("Data decrypted successfully.");
         return new String(finalDecrypted, StandardCharsets.UTF_8);
     }
 
@@ -154,7 +154,7 @@ public class RSAUtils {
 
         byte[] finalDecrypted = joinChunks(decryptedChunks);
         
-        logger.info("Data decrypted successfully.");
+        logger.debug("Data decrypted successfully.");
         return new String(finalDecrypted, StandardCharsets.UTF_8);
     }
 

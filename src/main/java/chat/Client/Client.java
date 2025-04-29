@@ -22,7 +22,7 @@ import chat.Shared.DHKeyExchange;
 public class Client {
     private static final Logger logger = LogManager.getLogger(Client.class);
     static {
-        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.INFO);
+        Configurator.setAllLevels(LogManager.getRootLogger().getName(), Level.DEBUG);
     }
 
     private static final String ADDRESS = "localhost";
@@ -44,11 +44,12 @@ public class Client {
             
             this.out = new ObjectOutputStream(socket.getOutputStream());
             this.in = new ObjectInputStream(socket.getInputStream());
-            logger.info("Connection established. Performing DH Key Exchange...");
+            logger.info("Connection established.");
+            logger.debug("Performing DH Key Exchange...");
             
             BigInteger sharedKey = DHKeyExchange.clientSideSharedKeyCreation(out, in);
             this.aesKey = AES.deriveAESKey(sharedKey.toByteArray());
-            logger.info("Key exchange successful. AES Key derived.");
+            logger.debug("Key exchange successful. AES Key derived.");
 		} catch (Exception e) {
             logger.error("Error while connecting to server or performing key exchange", e);
 			System.exit(1);
